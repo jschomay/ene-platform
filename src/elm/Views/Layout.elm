@@ -28,13 +28,28 @@ attributesView manifest =
         focusedItem =
             Manifest.focusedItem manifest
     in
-        [ div []
-            [ text <| toString <| focusedItem
-            , div [ class "attributes__name" ]
-                [ input [ class "attributes__name--input", value focusedItem.name, onInput UpdateName ] [] ]
-            , div [ class "attributes__description" ]
-                [ input [ class "attributes__description--input", value focusedItem.description, onInput UpdateDescription ] [] ]
+        [ label
+            [ for "name-input"
+            , class "content__attributes--label"
             ]
+            [ text "Name" ]
+        , input
+            [ id "name-input"
+            , class "content__attributes--input"
+            , value focusedItem.name
+            , onInput UpdateName
+            ]
+            []
+        , label
+            [ for "description-input", class "content__attributes--label" ]
+            [ text "Description" ]
+        , textarea
+            [ id "description-input"
+            , class "content__attributes--textarea"
+            , value focusedItem.description
+            , onInput UpdateDescription
+            ]
+            []
         ]
 
 

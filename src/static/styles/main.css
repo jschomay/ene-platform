@@ -8,13 +8,16 @@
   display: flex;
 }
 
-.main__attributes {
+.content__attributes {
   border: 1px solid;
+  display: flex;
+  justify-content: space-around;
 }
 
-.main__sidebar {
+.content__sidebar {
   display: flex;
   flex-direction: column;
+  min-width: 10%;
 }
 
 .editor__header {
@@ -33,4 +36,11 @@
 .sidebar__item, .sidebar__new {
   padding: 10px;
   border: 1px solid;
+}
+
+.content__attributes {
+  display: flex;
+  flex-direction: column;
+  padding-left: 10px;
+  flex-grow: 1;
 }
