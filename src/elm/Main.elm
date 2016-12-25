@@ -31,28 +31,72 @@ init =
         Items
 
 
+
+-- UPDATE
+
+
 update : Msg -> Model -> Model
 update msg model =
-    case msg of
-        NoOp ->
-            model
+    let
+        updateActiveManifest newManifest =
+            case model.activeTab of
+                Items ->
+                    { model | items = newManifest }
 
-        ChangeActiveTab tabName ->
-            { model | activeTab = tabName }
+                Locations ->
+                    { model | locations = newManifest }
+
+                Characters ->
+                    { model | characters = newManifest }
+    in
+        case msg of
+            NoOp ->
+                model
+
+            ChangeActiveTab tabName ->
+                { model | activeTab = tabName }
+
+            ChangeFocusedItem focusedItemId ->
+                let
+                    updatedManifest =
+                        Manifest.changeFocusedItem focusedItemId <| activeManifest model
+                in
+                    updateActiveManifest updatedManifest
+
+            UpdateName newName ->
+                activeManifest model
+                    |> Manifest.updateManifest
+                        (\attributes -> { attributes | name = newName })
+                    |> updateActiveManifest
+
+            UpdateDescription newDescription ->
+                activeManifest model
+                    |> Manifest.updateManifest
+                        (\attributes -> { attributes | description = newDescription })
+                    |> updateActiveManifest
+
+
+
+-- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    let
-        activeManifest =
-            case model.activeTab of
-                Items ->
-                    model.items
+    Views.Layout.view <| activeManifest model
 
-                Locations ->
-                    model.locations
 
-                Characters ->
-                    model.characters
-    in
-        Views.Layout.view activeManifest
+
+-- HELPERS
+
+
+activeManifest : Model -> Manifest.Manifest
+activeManifest model =
+    case model.activeTab of
+        Items ->
+            model.items
+
+        Locations ->
+            model.locations
+
+        Characters ->
+            model.characters

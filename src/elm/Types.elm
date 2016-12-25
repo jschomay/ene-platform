@@ -17,3 +17,6 @@ type alias Attributes =
 type Msg
     = NoOp
     | ChangeActiveTab TabName
+    | ChangeFocusedItem String
+    | UpdateName String
+    | UpdateDescription String
