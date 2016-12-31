@@ -26,9 +26,22 @@ attributesView : Manifest -> List (Html Msg)
 attributesView manifest =
     let
         focusedItem =
-            Manifest.focusedItem manifest
+            Maybe.withDefault (Attributes "" "") <|
+                Manifest.focusedItem manifest
     in
         [ label
+            [ for "id-input"
+            , class "content__attributes--label"
+            ]
+            [ text "ID" ]
+        , input
+            [ id "id-input"
+            , class "content__attributes--input"
+            , value <| Maybe.withDefault "" manifest.currentItemId
+            , disabled True
+            ]
+            []
+        , label
             [ for "name-input"
             , class "content__attributes--label"
             ]
@@ -76,7 +89,7 @@ headerView =
 sidebarView : Manifest -> List (Html Msg)
 sidebarView manifest =
     let
-        sidebarItem { name, description, id } =
+        sidebarItem ( id, { name, description } ) =
             div [ class "sidebar__item", onClick <| ChangeFocusedItem id ] [ text name ]
 
         sidebarAddItem =

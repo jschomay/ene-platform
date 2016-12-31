@@ -5,51 +5,50 @@ module Manifest
         , init
         , focusedItem
         , changeFocusedItem
-        , updateManifest
+        , update
         )
 
-import List.Zipper as Zipper
 import Types exposing (..)
+import Dict
 
 
-type Manifest
-    = Manifest (Maybe (Zipper.Zipper Attributes))
+type alias Manifest =
+    { currentItemId : Maybe String
+    , allItems : Dict.Dict String Attributes
+    }
 
 
-init : List Attributes -> Manifest
-init attributes =
-    Zipper.fromList attributes |> Manifest
+init : Maybe String -> List ( String, Attributes ) -> Manifest
+init focusedItemId attributes =
+    { currentItemId = focusedItemId
+    , allItems = Dict.fromList attributes
+    }
 
 
-attributes : Manifest -> List Attributes
-attributes (Manifest manifest) =
-    case manifest of
-        Nothing ->
-            []
-
-        Just manifest ->
-            Zipper.toList manifest
+attributes : Manifest -> List ( String, Attributes )
+attributes manifest =
+    Dict.toList manifest.allItems
 
 
-focusedItem : Manifest -> Attributes
-focusedItem (Manifest manifest) =
-    case manifest of
-        Nothing ->
-            Attributes "" "" ""
-
-        Just manifest ->
-            Zipper.current manifest
+focusedItem : Manifest -> Maybe Attributes
+focusedItem { currentItemId, allItems } =
+    currentItemId
+        |> Maybe.andThen (flip Dict.get allItems)
 
 
 changeFocusedItem : String -> Manifest -> Manifest
-changeFocusedItem itemId (Manifest manifest) =
-    let
-        updateHelper =
-            Zipper.find (\item -> item.id == itemId) << Zipper.first
-    in
-        Manifest <| Maybe.andThen updateHelper manifest
+changeFocusedItem itemId manifest =
+    { manifest | currentItemId = Just itemId }
 
 
-updateManifest : (Attributes -> Attributes) -> Manifest -> Manifest
-updateManifest f (Manifest manifest) =
-    Manifest <| Maybe.map (Zipper.mapCurrent f) manifest
+update : (Attributes -> Attributes) -> Manifest -> Manifest
+update f manifest =
+    case manifest.currentItemId of
+        Nothing ->
+            manifest
+
+        Just currentItemId ->
+            { manifest
+                | allItems =
+                    Dict.update currentItemId (Maybe.map f) manifest.allItems
+            }

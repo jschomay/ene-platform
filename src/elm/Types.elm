@@ -10,7 +10,6 @@ type TabName
 type alias Attributes =
     { name : String
     , description : String
-    , id : String
     }
 
 

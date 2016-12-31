@@ -25,9 +25,9 @@ type alias Model =
 init : Model
 init =
     Model
-        (Manifest.init [ Attributes "Umbrella" "An umbrella" "0", Attributes "Red Marble" "Shiny" "1" ])
-        (Manifest.init [ Attributes "house" "My house" "0" ])
-        (Manifest.init [ Attributes "maor" "The one and only" "0" ])
+        (Manifest.init (Just "umbrella") [ ( "umbrella", Attributes "Umbrella" "An umbrella" ), ( "marble", Attributes "Red Marble" "Shiny" ) ])
+        (Manifest.init (Just "house") [ ( "house", Attributes "house" "My house" ) ])
+        (Manifest.init (Just "maor") [ ( "maor", Attributes "maor" "The one and only" ) ])
         Items
 
 
@@ -38,7 +38,7 @@ init =
 update : Msg -> Model -> Model
 update msg model =
     let
-        updateActiveManifest newManifest =
+        saveActiveManifest newManifest =
             case model.activeTab of
                 Items ->
                     { model | items = newManifest }
@@ -61,19 +61,19 @@ update msg model =
                     updatedManifest =
                         Manifest.changeFocusedItem focusedItemId <| activeManifest model
                 in
-                    updateActiveManifest updatedManifest
+                    saveActiveManifest updatedManifest
 
             UpdateName newName ->
                 activeManifest model
-                    |> Manifest.updateManifest
+                    |> Manifest.update
                         (\attributes -> { attributes | name = newName })
-                    |> updateActiveManifest
+                    |> saveActiveManifest
 
             UpdateDescription newDescription ->
                 activeManifest model
-                    |> Manifest.updateManifest
+                    |> Manifest.update
                         (\attributes -> { attributes | description = newDescription })
-                    |> updateActiveManifest
+                    |> saveActiveManifest
 
 
 
