@@ -7,63 +7,52 @@ import Manifest exposing (..)
 import Html.Events exposing (..)
 
 
-view : Manifest -> Html Msg
-view activeManifest =
+view : Manifest -> Maybe AttributeEditor -> Html Msg
+view manifest editor =
     div [ class "editor" ]
         [ div [ class "editor__header" ] <| headerView
-        , div [ class "editor__content" ] <| contentView <| activeManifest
+        , div [ class "editor__content" ] <| contentView manifest editor
         ]
 
 
-contentView : Manifest -> List (Html Msg)
-contentView manifest =
+contentView : Manifest -> Maybe AttributeEditor -> List (Html Msg)
+contentView manifest editor =
     [ div [ class "content__sidebar" ] <| sidebarView manifest
-    , div [ class "content__attributes" ] <| attributesView manifest
+    , div [ class "content__attributes" ] <| attributesView editor
     ]
 
 
-attributesView : Manifest -> List (Html Msg)
-attributesView manifest =
-    let
-        focusedItem =
-            Maybe.withDefault (Attributes "" "") <|
-                Manifest.focusedItem manifest
-    in
-        [ label
-            [ for "id-input"
-            , class "content__attributes--label"
-            ]
-            [ text "ID" ]
-        , input
-            [ id "id-input"
-            , class "content__attributes--input"
-            , value <| Maybe.withDefault "" manifest.currentItemId
-            , disabled True
-            ]
+attributesView : Maybe AttributeEditor -> List (Html Msg)
+attributesView editor =
+    case editor of
+        Nothing ->
             []
-        , label
-            [ for "name-input"
-            , class "content__attributes--label"
+
+        Just { itemId, displayName, description, isNew } ->
+            [ label
+                [ for "name-input"
+                , class "content__attributes--label"
+                ]
+                [ text "Name" ]
+            , input
+                [ id "name-input"
+                , class "content__attributes--input"
+                , value displayName
+                , onInput UpdateName
+                ]
+                []
+            , label
+                [ for "description-input", class "content__attributes--label" ]
+                [ text "Description" ]
+            , textarea
+                [ id "description-input"
+                , class "content__attributes--textarea"
+                , value description
+                , onInput UpdateDescription
+                ]
+                []
+            , button [ onClick Save ] [ text "submit" ]
             ]
-            [ text "Name" ]
-        , input
-            [ id "name-input"
-            , class "content__attributes--input"
-            , value focusedItem.name
-            , onInput UpdateName
-            ]
-            []
-        , label
-            [ for "description-input", class "content__attributes--label" ]
-            [ text "Description" ]
-        , textarea
-            [ id "description-input"
-            , class "content__attributes--textarea"
-            , value focusedItem.description
-            , onInput UpdateDescription
-            ]
-            []
-        ]
 
 
 headerView : List (Html Msg)
@@ -93,7 +82,7 @@ sidebarView manifest =
             div [ class "sidebar__item", onClick <| ChangeFocusedItem id ] [ text name ]
 
         sidebarAddItem =
-            [ div [ class "sidebar__new" ] [ text "+" ] ]
+            [ div [ class "sidebar__new", onClick Create ] [ text "+" ] ]
 
         existingSidebarItems =
             List.map sidebarItem <| Manifest.attributes manifest
