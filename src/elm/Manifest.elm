@@ -3,9 +3,8 @@ module Manifest
         ( Manifest
         , attributes
         , init
-        , focusedItem
-        , changeFocusedItem
-        , update
+        , save
+        , get
         )
 
 import Types exposing (..)
@@ -13,42 +12,65 @@ import Dict
 
 
 type alias Manifest =
-    { currentItemId : Maybe String
-    , allItems : Dict.Dict String Attributes
+    { currentItemId : Maybe Int
+    , allItems : Dict.Dict Int Attributes
     }
 
 
-init : Maybe String -> List ( String, Attributes ) -> Manifest
+init : Maybe Int -> List ( Int, Attributes ) -> Manifest
 init focusedItemId attributes =
     { currentItemId = focusedItemId
     , allItems = Dict.fromList attributes
     }
 
 
-attributes : Manifest -> List ( String, Attributes )
+attributes : Manifest -> List ( Int, Attributes )
 attributes manifest =
     Dict.toList manifest.allItems
 
 
-focusedItem : Manifest -> Maybe Attributes
-focusedItem { currentItemId, allItems } =
-    currentItemId
-        |> Maybe.andThen (flip Dict.get allItems)
+get : Int -> Manifest -> Maybe Attributes
+get itemId manifest =
+    Dict.get itemId manifest.allItems
 
 
-changeFocusedItem : String -> Manifest -> Manifest
-changeFocusedItem itemId manifest =
-    { manifest | currentItemId = Just itemId }
+save : Maybe AttributeEditor -> Manifest -> Result String Manifest
+save editor manifest =
+    let
+        validate editor =
+            let
+                validateExistence editor =
+                    Result.fromMaybe "no editor selected" editor
 
+                validateDisplayNameExistence editor =
+                    if not <| String.isEmpty editor.displayName then
+                        Ok editor
+                    else
+                        Err "Display Name is required"
 
-update : (Attributes -> Attributes) -> Manifest -> Manifest
-update f manifest =
-    case manifest.currentItemId of
-        Nothing ->
-            manifest
+                validateDisplayNameUnique editor =
+                    let
+                        f key val =
+                            key /= editor.itemId && String.toLower val.name == String.toLower editor.displayName
+                    in
+                        if
+                            manifest.allItems
+                                |> Dict.filter f
+                                |> Dict.isEmpty
+                        then
+                            Ok editor
+                        else
+                            Err "Display Name should be unique"
+            in
+                validateExistence editor
+                    |> Result.andThen validateDisplayNameExistence
+                    |> Result.andThen validateDisplayNameUnique
 
-        Just currentItemId ->
+        updateManifest editor =
             { manifest
                 | allItems =
-                    Dict.update currentItemId (Maybe.map f) manifest.allItems
+                    Dict.insert editor.itemId (Attributes editor.displayName editor.description) manifest.allItems
             }
+    in
+        validate editor
+            |> Result.map updateManifest

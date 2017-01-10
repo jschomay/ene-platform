@@ -16,6 +16,16 @@ type alias Attributes =
 type Msg
     = NoOp
     | ChangeActiveTab TabName
-    | ChangeFocusedItem String
+    | ChangeFocusedItem Int
     | UpdateName String
     | UpdateDescription String
+    | Save
+    | Create
+
+
+type alias AttributeEditor =
+    { itemId : Int
+    , displayName : String
+    , description : String
+    , isNew : Bool
+    }
