@@ -28,7 +28,7 @@ attributesView editor =
         Nothing ->
             []
 
-        Just { itemId, displayName, description, isNew } ->
+        Just { itemId, displayName, description, cssSelector } ->
             [ label
                 [ for "name-input"
                 , class "content__attributes--label"
@@ -39,6 +39,18 @@ attributesView editor =
                 , class "content__attributes--input"
                 , value displayName
                 , onInput UpdateName
+                ]
+                []
+            , label
+                [ for "css-input"
+                , class "content__attributes--label"
+                ]
+                [ text "CSS Selector (* Must be a valid selector *)" ]
+            , input
+                [ id "css-input"
+                , class "content__attributes--input"
+                , value cssSelector
+                , onInput UpdateCssSelector
                 ]
                 []
             , label

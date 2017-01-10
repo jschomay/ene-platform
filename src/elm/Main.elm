@@ -27,9 +27,9 @@ type alias Model =
 init : Model
 init =
     Model
-        (Manifest.init Nothing [ ( 0, Attributes "Umbrella" "An umbrella" ), ( 1, Attributes "Red Marble" "Shiny" ) ])
-        (Manifest.init Nothing [ ( 2, Attributes "house" "My house" ) ])
-        (Manifest.init Nothing [ ( 3, Attributes "maor" "The one and only" ) ])
+        (Manifest.init Nothing [ ( 0, Attributes "Umbrella" "An umbrella" "umbrella" ), ( 1, Attributes "Red Marble" "Shiny" "marble" ) ])
+        (Manifest.init Nothing [ ( 2, Attributes "house" "My house" "house" ) ])
+        (Manifest.init Nothing [ ( 3, Attributes "maor" "The one and only" "maor" ) ])
         Items
         Nothing
         3
@@ -66,16 +66,16 @@ update msg model =
                         activeManifest model
                             |> Manifest.get focusedItemId
                             |> Maybe.andThen
-                                (\{ name, description } ->
-                                    Just <| AttributeEditor focusedItemId name description False
+                                (\{ name, description, cssSelector } ->
+                                    Just <| AttributeEditor focusedItemId name description cssSelector
                                 )
                 in
                     { model | attributeEditor = newEditor }
 
             UpdateName newName ->
                 let
-                    newEditor { itemId, displayName, description, isNew } =
-                        AttributeEditor itemId newName description isNew
+                    newEditor { itemId, displayName, description, cssSelector } =
+                        AttributeEditor itemId newName description cssSelector
                 in
                     { model | attributeEditor = Maybe.map newEditor model.attributeEditor }
 
@@ -86,28 +86,28 @@ update msg model =
                 in
                     { model | attributeEditor = Maybe.map newEditor model.attributeEditor }
 
-            Save ->
+            UpdateCssSelector newSelector ->
                 let
                     newEditor editor =
-                        { editor | isNew = False }
+                        { editor | cssSelector = newSelector }
                 in
-                    activeManifest model
-                        |> \manifest ->
-                            -- placeholder for now, crash on nonunique id
-                            case
-                                Manifest.save model.attributeEditor manifest
-                            of
-                                Err error ->
-                                    Debug.crash error
+                    { model | attributeEditor = Maybe.map newEditor model.attributeEditor }
 
-                                Ok manifest ->
-                                    saveActiveManifest manifest
-                                        |> (\model ->
-                                                { model | attributeEditor = Maybe.map newEditor model.attributeEditor }
-                                           )
+            Save ->
+                activeManifest model
+                    |> \manifest ->
+                        -- placeholder for now, crash on nonunique id
+                        case
+                            Manifest.save model.attributeEditor manifest
+                        of
+                            Err error ->
+                                Debug.crash error
+
+                            Ok manifest ->
+                                saveActiveManifest manifest
 
             Create ->
-                { model | attributeEditor = Just <| AttributeEditor (model.lastId + 1) "" "" True, lastId = model.lastId + 1 }
+                { model | attributeEditor = Just <| AttributeEditor (model.lastId + 1) "" "" "", lastId = model.lastId + 1 }
 
 
 view : Model -> Html Msg

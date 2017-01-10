@@ -69,7 +69,7 @@ save editor manifest =
         updateManifest editor =
             { manifest
                 | allItems =
-                    Dict.insert editor.itemId (Attributes editor.displayName editor.description) manifest.allItems
+                    Dict.insert editor.itemId (Attributes editor.displayName editor.description editor.cssSelector) manifest.allItems
             }
     in
         validate editor
