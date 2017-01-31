@@ -4,8 +4,8 @@ import Html exposing (..)
 import Types exposing (..)
 import Views.Layout
 import Manifest
-
-
+import Dict exposing (Dict)
+import Entities.Item as Item exposing (Item)
 -- APP
 
 
@@ -15,11 +15,9 @@ main =
 
 
 type alias Model =
-    { items : Manifest.Manifest
-    , locations : Manifest.Manifest
-    , characters : Manifest.Manifest
+    { items : Dict String Item
     , activeTab : TabName
-    , attributeEditor : Maybe AttributeEditor
+    , attributeEditor : Maybe Component
     , lastId : Int
     }
 
@@ -27,10 +25,8 @@ type alias Model =
 init : Model
 init =
     Model
-        (Manifest.init Nothing [ ( 0, Attributes "Umbrella" "An umbrella"), ( 1, Attributes "Red Marble" "Shiny") ])
-        (Manifest.init Nothing [ ( 2, Attributes "house" "My house") ])
-        (Manifest.init Nothing [ ( 3, Attributes "maor" "The one and only") ])
-        Items
+        (Dict.singleton "item1" Item.init)
+        ItemsTab
         Nothing
         3
 
@@ -44,13 +40,13 @@ update msg model =
     let
         saveActiveManifest newManifest =
             case model.activeTab of
-                Items ->
+                ItemsTab ->
                     { model | items = newManifest }
 
-                Locations ->
-                    { model | locations = newManifest }
+                LocationsTab ->
+                    model
 
-                Characters ->
+                CharactersTab ->
                     { model | characters = newManifest }
     in
         case msg of
@@ -115,11 +111,11 @@ view model =
 activeManifest : Model -> Manifest.Manifest
 activeManifest model =
     case model.activeTab of
-        Items ->
+        ItemsTab ->
             model.items
 
-        Locations ->
+        LocationsTab ->
             model.locations
 
-        Characters ->
+        CharactersTab ->
             model.characters

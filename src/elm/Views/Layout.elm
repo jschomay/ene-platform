@@ -59,17 +59,17 @@ headerView : List (Html Msg)
 headerView =
     [ div
         [ class "header__tab"
-        , onClick <| ChangeActiveTab Items
+        , onClick <| ChangeActiveTab ItemsTab
         ]
         [ text "Items" ]
     , div
         [ class "header__tab"
-        , onClick <| ChangeActiveTab Locations
+        , onClick <| ChangeActiveTab LocationsTab
         ]
         [ text "Locations" ]
     , div
         [ class "header__tab"
-        , onClick <| ChangeActiveTab Characters
+        , onClick <| ChangeActiveTab CharactersTab
         ]
         [ text "Characters" ]
     ]

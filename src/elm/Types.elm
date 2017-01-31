@@ -1,10 +1,19 @@
 module Types exposing (..)
 
+import Dict exposing (..)
 
 type TabName
-    = Items
-    | Locations
-    | Characters
+    = ItemsTab
+    | LocationsTab
+    | CharactersTab
+
+
+type Component
+    = Display { name : String, description : String }
+    | Style { selector : String }
+
+type Location = Location String (Dict String Component)
+type Character = Character String (Dict String Component)
 
 
 type alias Attributes =
