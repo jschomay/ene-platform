@@ -1,4 +1,14 @@
-module Entity exposing (..)
+module Entity
+    exposing
+        ( Components
+        , Entity
+        , empty
+        , init
+        , update
+        , getComponents
+        , editorView
+        , newEntityId
+        )
 
 import Dict exposing (Dict)
 import Html exposing (..)
@@ -7,8 +17,12 @@ import Html.Events exposing (onInput, onClick)
 import Types exposing (..)
 
 
+type alias Components =
+    Dict String Component
+
+
 type Entity
-    = Entity (Dict String Component)
+    = Entity Components
 
 
 empty : Entity
@@ -16,23 +30,23 @@ empty =
     Entity Dict.empty
 
 
-init : Dict String Component -> Entity
+init : Components -> Entity
 init components =
     update empty components
 
 
-update : Entity -> Dict String Component -> Entity
+update : Entity -> Components -> Entity
 update (Entity oldComponents) newComponents =
     -- Note, newComponents MUST be first!
     Entity <| Dict.union newComponents oldComponents
 
 
-getComponents : Entity -> Dict String Component
+getComponents : Entity -> Components
 getComponents (Entity components) =
     components
 
 
-editorView : Dict String Component -> List (Html Msg)
+editorView : Components -> List (Html Msg)
 editorView components =
     let
         componentView componentName component =
@@ -112,3 +126,11 @@ editorView components =
                         ]
     in
         Dict.values <| Dict.map componentView components
+
+
+newEntityId : TabName -> Int -> String
+newEntityId tabName newId =
+    toString tabName
+        |> String.dropRight 3
+        |> String.toLower
+        |> (flip (++)) (toString newId)

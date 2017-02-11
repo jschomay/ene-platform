@@ -1,15 +1,15 @@
-module Tests.Item exposing (..)
+module Tests.Entity exposing (..)
 
 import Test exposing (..)
 import Expect
-import Entities.Item as Item
+import Entity
 import Types exposing (..)
 import Dict
 
 
 all : Test
 all =
-    describe "Item"
+    describe "Entity"
         [ describe "update"
             [ test "merges new data over existing" <|
                 \() ->
@@ -35,10 +35,10 @@ all =
                                 ]
 
                         existing =
-                            Item.update Item.empty components1
+                            Entity.update Entity.empty components1
 
                         merged =
-                            Item.update existing components2
+                            Entity.update existing components2
                     in
                         Expect.equal
                             (Dict.fromList
@@ -50,6 +50,11 @@ all =
                                   )
                                 ]
                             )
-                            (Item.getComponents <| Item.update merged Dict.empty)
+                            (Entity.getComponents <| Entity.update merged Dict.empty)
+            ]
+        , describe "newEntityId"
+            [ test "generates correct structure" <|
+                \() ->
+                    Expect.equal "items123" <| Entity.newEntityId ItemsTab 123
             ]
         ]

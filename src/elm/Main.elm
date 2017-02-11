@@ -22,17 +22,18 @@ type alias Model =
     , activeTab : TabName
     , lastId : Int
     , focusedEntity :
-        -- TODO, maybe rull into editor field?
-        Maybe String
-    , editor : Maybe (Dict String Component)
+        Maybe
+            { entityId : String
+            , editor : Components
+            }
     }
 
 
 init : Model
 init =
     Model
-        (Dict.singleton "item1" <| Entity.init (Dict.singleton "display" (Display { name = "item1", description = "my item" })))
-        (Dict.singleton "location1" <|
+        (Dict.singleton "items1" <| Entity.init (Dict.singleton "display" (Display { name = "item1", description = "my item" })))
+        (Dict.singleton "locations1" <|
             Entity.init
                 (Dict.fromList
                     [ ( "display", Display { name = "location1", description = "my location" } )
@@ -40,10 +41,9 @@ init =
                     ]
                 )
         )
-        (Dict.singleton "character1" Entity.empty)
+        (Dict.singleton "characters1" Entity.empty)
         ItemsTab
         3
-        Nothing
         Nothing
 
 
@@ -74,7 +74,6 @@ update msg model =
             { model
                 | activeTab = tabName
                 , focusedEntity = Nothing
-                , editor = Nothing
             }
 
         ChangeFocusedEntity focusedEntity ->
@@ -83,15 +82,22 @@ update msg model =
                     getActiveEntities model
             in
                 { model
-                    | focusedEntity = Just focusedEntity
-                    , editor =
-                        Just (Entity.getComponents (Dict.get focusedEntity currentEntities |> Maybe.withDefault Entity.empty))
-                        -- TODO , maybe just crash?
+                    | focusedEntity =
+                        Just
+                            { entityId = focusedEntity
+                            , editor =
+                                (Entity.getComponents
+                                    (Dict.get focusedEntity currentEntities
+                                        |> Maybe.withDefault Entity.empty
+                                    )
+                                )
+                                -- TODO , maybe just crash?
+                            }
                 }
 
         SaveEntity ->
-            case ( model.editor, model.focusedEntity ) of
-                ( Just editor, Just entityId ) ->
+            case model.focusedEntity of
+                Just { entityId, editor } ->
                     case model.activeTab of
                         ItemsTab ->
                             { model | items = Dict.insert entityId (Entity.update Entity.empty editor) model.items }
@@ -109,49 +115,24 @@ update msg model =
             let
                 newId =
                     model.lastId + 1
-
-                entityPrefix =
-                    case model.activeTab of
-                        ItemsTab ->
-                            "item"
-
-                        LocationsTab ->
-                            "location"
-
-                        CharactersTab ->
-                            "character"
             in
                 { model
-                    | focusedEntity = Just <| entityPrefix ++ toString newId
-                    , editor = Just <| Dict.singleton "display" (Display { name = "", description = "" })
+                    | focusedEntity =
+                        Just
+                            { entityId = Entity.newEntityId model.activeTab newId
+                            , editor = Dict.singleton "display" (Display { name = "", description = "" })
+                            }
                     , lastId = newId
                 }
 
-        UpdateComponentProperties string component ->
-            { model
-                | editor = Nothing
-            }
-
         UpdateEditor componentName componentToUpdate f newVal ->
             let
-                updateHelper editor =
-                    Dict.insert componentName (f newVal componentToUpdate) editor
+                updateHelper focusedEntity =
+                    { focusedEntity | editor = Dict.insert componentName (f newVal componentToUpdate) focusedEntity.editor }
             in
-                ({ model | editor = Maybe.map updateHelper model.editor })
+                ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
 
 
 view : Model -> Html Msg
 view model =
-    let
-        currentEntities =
-            case model.activeTab of
-                ItemsTab ->
-                    model.items
-
-                LocationsTab ->
-                    model.locations
-
-                CharactersTab ->
-                    model.characters
-    in
-        Views.Layout.view currentEntities model.focusedEntity model.editor
+    Views.Layout.view (getActiveEntities model) model.focusedEntity

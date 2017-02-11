@@ -4,28 +4,28 @@ import Types exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Entity as Entity exposing (Entity)
+import Entity as Entity exposing (Entity, Components)
 import Dict exposing (Dict)
 
 
-view : Dict String Entity -> Maybe String -> Maybe (Dict String Component) -> Html Msg
-view items focusedEntity components =
+view : Dict String Entity -> Maybe { entityId : String, editor : Components } -> Html Msg
+view items focusedEntity =
     div [ class "editor" ]
         [ div [ class "editor__header" ] <| headerView
-        , div [ class "editor__content" ] <| contentView items focusedEntity components
+        , div [ class "editor__content" ] <| contentView items focusedEntity
         ]
 
 
-contentView : Dict String Entity -> Maybe String -> Maybe (Dict String Component) -> List (Html Msg)
-contentView items focusedEntity components =
-    [ div [ class "content__sidebar" ] <| sidebarView items focusedEntity
+contentView : Dict String Entity -> Maybe { entityId : String, editor : Components } -> List (Html Msg)
+contentView items focusedEntity =
+    [ div [ class "content__sidebar" ] <| sidebarView items
     , div [ class "content__attributes" ] <|
-        case components of
+        case focusedEntity of
             Nothing ->
                 [ text "Hey, make something useful" ]
 
-            Just components ->
-                Entity.editorView components
+            Just { entityId, editor } ->
+                Entity.editorView editor
     ]
 
 
@@ -49,8 +49,8 @@ headerView =
     ]
 
 
-sidebarView : Dict String Entity -> Maybe String -> List (Html Msg)
-sidebarView items focusedEntity =
+sidebarView : Dict String Entity -> List (Html Msg)
+sidebarView items =
     let
         sidebarEntity id _ =
             div [ class "sidebar__item", onClick <| ChangeFocusedEntity id ] [ text id ]
