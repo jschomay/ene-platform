@@ -8,11 +8,6 @@
   display: flex;
 }
 
-.content__attributes {
-  border: 1px solid;
-  display: flex;
-  justify-content: space-around;
-}
 
 .content__sidebar {
   display: flex;
@@ -42,5 +37,12 @@
   display: flex;
   flex-direction: column;
   padding-left: 10px;
+  border: 1px solid; 
   flex-grow: 1;
+}
+
+.content__attributes div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
