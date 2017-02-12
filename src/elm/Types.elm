@@ -25,8 +25,4 @@ type Msg
     | SaveEntity
     | NewEntity
     | UpdateEditor String Component (String -> Component -> Component) String
-
-
-
--- TODO add this Msg
--- | AddComponent String Component
+    | AddComponent String Component

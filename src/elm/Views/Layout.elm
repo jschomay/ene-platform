@@ -18,8 +18,8 @@ view items focusedEntity =
 
 contentView : Dict String Entity -> Maybe { entityId : String, editor : Components } -> List (Html Msg)
 contentView items focusedEntity =
-    [ div [ class "content__sidebar" ] <| sidebarView items
-    , div [ class "content__attributes" ] <|
+    [ div [ class "sidebar" ] <| sidebarView items
+    , div [ class "attributes" ] <|
         case focusedEntity of
             Nothing ->
                 [ text "Hey, make something useful" ]
@@ -32,17 +32,17 @@ contentView items focusedEntity =
 headerView : List (Html Msg)
 headerView =
     [ div
-        [ class "header__tab"
+        [ class "headerTab"
         , onClick <| ChangeActiveTab ItemsTab
         ]
         [ text "Items" ]
     , div
-        [ class "header__tab"
+        [ class "headerTab"
         , onClick <| ChangeActiveTab LocationsTab
         ]
         [ text "Locations" ]
     , div
-        [ class "header__tab"
+        [ class "headerTab"
         , onClick <| ChangeActiveTab CharactersTab
         ]
         [ text "Characters" ]

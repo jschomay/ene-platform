@@ -132,6 +132,13 @@ update msg model =
             in
                 ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
 
+        AddComponent name component ->
+            let
+                updateHelper focusedEntity =
+                    { focusedEntity | editor = Dict.insert name component focusedEntity.editor }
+            in
+                ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
+
 
 view : Model -> Html Msg
 view model =
