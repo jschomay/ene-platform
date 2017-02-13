@@ -1,14 +1,11 @@
 module Entity
     exposing
-        ( Components
-        , Entity
-        , empty
+        ( empty
         , init
         , update
         , getComponents
         , editorView
         , newEntityId
-        , getAvailableComponents
         )
 
 import Dict exposing (Dict)
@@ -16,14 +13,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Types exposing (..)
-
-
-type alias Components =
-    Dict String Component
-
-
-type Entity
-    = Entity Components
+import Component
 
 
 empty : Entity
@@ -54,84 +44,6 @@ getComponents (Entity components) =
 editorView : Components -> List (Html Msg)
 editorView components =
     let
-        componentView componentName component =
-            case component of
-                Display { name, description } ->
-                    div [ class "attributesEditor" ]
-                        [ div [ class "attributesEditor__item" ]
-                            [ label
-                                [ for "name-input"
-                                ]
-                                [ text "Name" ]
-                            , input
-                                [ id "name-input"
-                                , value name
-                                , onInput <|
-                                    UpdateEditor componentName
-                                        component
-                                        (\newVal component ->
-                                            case component of
-                                                Display attributes ->
-                                                    Display { attributes | name = newVal }
-
-                                                _ ->
-                                                    component
-                                        )
-                                ]
-                                []
-                            ]
-                        , div [ class "attributesEditor__item" ]
-                            [ label
-                                [ for "description-input" ]
-                                [ text "Description" ]
-                            , textarea
-                                [ id "description-input"
-                                , value description
-                                , onInput <|
-                                    UpdateEditor componentName
-                                        component
-                                        (\newVal component ->
-                                            case component of
-                                                Display attributes ->
-                                                    Display { attributes | description = newVal }
-
-                                                _ ->
-                                                    component
-                                        )
-                                ]
-                                []
-                            ]
-                        ]
-
-                Style { selector } ->
-                    div [ class "attributesEditor" ]
-                        [ div [ class "attributesEditor__item" ]
-                            [ label
-                                [ for "selector-input"
-                                , class "Components__Attributes--label"
-                                ]
-                                [ text "CSS Selector"
-                                ]
-                            , input
-                                [ id "selector-input"
-                                , class "Components__Attributes--input"
-                                , value selector
-                                , onInput <|
-                                    UpdateEditor componentName
-                                        component
-                                        (\newVal component ->
-                                            case component of
-                                                Style attributes ->
-                                                    Style { attributes | selector = newVal }
-
-                                                _ ->
-                                                    component
-                                        )
-                                ]
-                                []
-                            ]
-                        ]
-
         submitButton =
             case Dict.size components of
                 0 ->
@@ -142,7 +54,7 @@ editorView components =
     in
         addComponentView components
             :: (Dict.values <|
-                    Dict.map componentView components
+                    Dict.map Component.view components
                )
             ++ submitButton
 
@@ -151,7 +63,7 @@ addComponentView : Components -> Html Msg
 addComponentView existingComponents =
     let
         availableComponents =
-            getAvailableComponents existingComponents
+            Component.getAvailableComponents existingComponents
 
         addComponentRenderer ( name, component ) =
             div []
@@ -167,10 +79,6 @@ addComponentView existingComponents =
             |> div [ class "addComponent" ]
 
 
-
--- [ , button [ onClick <| AddComponent "style" (Style { selector = "" }) ] [] ]
-
-
 newEntityId : TabName -> Int -> String
 newEntityId tabName newId =
     toString tabName
@@ -179,10 +87,7 @@ newEntityId tabName newId =
         |> (flip (++)) (toString newId)
 
 
-getAvailableComponents : Components -> Components
-getAvailableComponents components =
-    let
-        allAvailableComponents =
-            Dict.fromList [ ( "display", Display { name = "", description = "" } ), ( "style", Style { selector = "" } ) ]
-    in
-        Dict.diff allAvailableComponents components
+
+-- some more data we need there: 1. list of entities the component belongs to
+--                               2. Whether its default or can be deleted
+-- then allAvaialbleComponents can filter out by entity that it belongs to?

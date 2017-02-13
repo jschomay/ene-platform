@@ -4,7 +4,7 @@ import Types exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Entity as Entity exposing (Entity, Components)
+import Entity as Entity
 import Dict exposing (Dict)
 
 
