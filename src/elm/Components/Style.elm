@@ -8,35 +8,38 @@ import Html.Events exposing (onInput)
 
 view : String -> Component -> Html Msg
 view componentName component =
-    case component of
-        Style { selector } ->
-            div [ class "attributesEditor" ]
-                [ div [ class "attributesEditor__item" ]
-                    [ label
-                        [ for "selector-input"
-                        , class "Components__Attributes--label"
-                        ]
-                        [ text "CSS Selector"
-                        ]
-                    , input
-                        [ id "selector-input"
-                        , class "Components__Attributes--input"
-                        , value selector
-                        , onInput <|
-                            UpdateEditor componentName
-                                component
-                                (\newVal component ->
-                                    case component of
-                                        Style attributes ->
-                                            Style { attributes | selector = newVal }
+    let
+        updateSelector newVal =
+            updateFn newVal (\a -> { a | selector = newVal })
 
-                                        _ ->
-                                            component
-                                )
+        updateFn newVal f =
+            case component of
+                Style a ->
+                    Style <| f a
+
+                _ ->
+                    component
+    in
+        case component of
+            Style { selector } ->
+                div [ class "attributesEditor" ]
+                    [ div [ class "attributesEditor__item" ]
+                        [ label
+                            [ for "selector-input"
+                            , class "Components__Attributes--label"
+                            ]
+                            [ text "CSS Selector"
+                            ]
+                        , input
+                            [ id "selector-input"
+                            , class "Components__Attributes--input"
+                            , value selector
+                            , onInput <|
+                                UpdateEditor componentName updateSelector
+                            ]
+                            []
                         ]
-                        []
                     ]
-                ]
 
-        _ ->
-            div [] []
+            _ ->
+                div [] []

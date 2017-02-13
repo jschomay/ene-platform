@@ -28,7 +28,7 @@ type Msg
     | ChangeFocusedEntity String
     | SaveEntity
     | NewEntity
-    | UpdateEditor String Component (String -> Component -> Component) String
+    | UpdateEditor String (String -> Component) String
     | AddComponent String Component
 
 

@@ -125,10 +125,10 @@ update msg model =
                     , lastId = newId
                 }
 
-        UpdateEditor componentName componentToUpdate f newVal ->
+        UpdateEditor componentName f newVal ->
             let
                 updateHelper focusedEntity =
-                    { focusedEntity | editor = Dict.insert componentName (f newVal componentToUpdate) focusedEntity.editor }
+                    { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
             in
                 ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
 
