@@ -1,30 +1,46 @@
 module Types exposing (..)
 
+import Dict exposing (..)
+
 
 type TabName
-    = Items
-    | Locations
-    | Characters
+    = ItemsTab
+    | LocationsTab
+    | CharactersTab
 
 
-type alias Attributes =
-    { name : String
-    , description : String
-    }
+
+-- maybe this is a dictionary?
+-- and maybe its not typed anymore?
+-- and finally, maybe this is loaded dynamically from a json?
+-- Dict String (componentData, entitiesItBelongsTo)
+-- entitiesItBelongsTo: Entity Bool
+
+
+type Component
+    = Display { name : String, description : String }
+    | Style { selector : String }
 
 
 type Msg
     = NoOp
     | ChangeActiveTab TabName
-    | ChangeFocusedItem Int
-    | UpdateName String
-    | UpdateDescription String
-    | Save
-    | Create
+    | ChangeFocusedEntity String
+    | SaveEntity
+    | NewEntity
+    | UpdateEditor String (String -> Component) String
+    | AddComponent String Component
 
 
-type alias AttributeEditor =
-    { itemId : Int
-    , displayName : String
-    , description : String
-    }
+type alias Components =
+    Dict String Component
+
+
+type Entity
+    = Entity Components
+
+
+type EntityClasses
+    = Item
+    | Location
+    | Character

@@ -1,3 +1,8 @@
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
 .editor {
   margin: 0 auto;
   width: 100%;
@@ -8,13 +13,8 @@
   display: flex;
 }
 
-.content__attributes {
-  border: 1px solid;
-  display: flex;
-  justify-content: space-around;
-}
 
-.content__sidebar {
+.sidebar {
   display: flex;
   flex-direction: column;
   min-width: 10%;
@@ -27,7 +27,7 @@
   padding-top: 20px;
 }
 
-.header__tab {
+.headerTab {
   border: 1px solid;
   padding: 20px;
   border-bottom: none;
@@ -38,9 +38,34 @@
   border: 1px solid;
 }
 
-.content__attributes {
+.attributes {
   display: flex;
   flex-direction: column;
   padding-left: 10px;
+  border: 1px solid; 
   flex-grow: 1;
+}
+
+.attributesEditor {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+
+.attributesEditor__item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.attributesEditor__item label {
+  flex: 1;
+}
+
+.attributesEditor__item input {
+  flex: 6;
+}
+
+.attributesEditor__item textarea {
+  flex: 6;
 }

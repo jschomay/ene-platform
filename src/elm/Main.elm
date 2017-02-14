@@ -3,7 +3,8 @@ module Main exposing (..)
 import Html exposing (..)
 import Types exposing (..)
 import Views.Layout
-import Manifest
+import Dict exposing (Dict)
+import Entity exposing (..)
 
 
 -- APP
@@ -15,111 +16,130 @@ main =
 
 
 type alias Model =
-    { items : Manifest.Manifest
-    , locations : Manifest.Manifest
-    , characters : Manifest.Manifest
+    { items : Dict String Entity
+    , locations : Dict String Entity
+    , characters : Dict String Entity
     , activeTab : TabName
-    , attributeEditor : Maybe AttributeEditor
     , lastId : Int
+    , focusedEntity :
+        Maybe
+            { entityId : String
+            , editor : Components
+            }
     }
 
 
 init : Model
 init =
     Model
-        (Manifest.init Nothing [ ( 0, Attributes "Umbrella" "An umbrella"), ( 1, Attributes "Red Marble" "Shiny") ])
-        (Manifest.init Nothing [ ( 2, Attributes "house" "My house") ])
-        (Manifest.init Nothing [ ( 3, Attributes "maor" "The one and only") ])
-        Items
-        Nothing
+        (Dict.singleton "items1" <| Entity.init (Dict.singleton "display" (Display { name = "item1", description = "my item" })))
+        (Dict.singleton "locations1" <|
+            Entity.init
+                (Dict.fromList
+                    [ ( "display", Display { name = "location1", description = "my location" } )
+                    , ( "style", Style { selector = "mySelector" } )
+                    ]
+                )
+        )
+        (Dict.singleton "characters1" Entity.empty)
+        ItemsTab
         3
+        Nothing
 
 
 
 -- UPDATE
 
 
+getActiveEntities : Model -> Dict String Entity
+getActiveEntities model =
+    case model.activeTab of
+        ItemsTab ->
+            model.items
+
+        LocationsTab ->
+            model.locations
+
+        CharactersTab ->
+            model.characters
+
+
 update : Msg -> Model -> Model
 update msg model =
-    let
-        saveActiveManifest newManifest =
-            case model.activeTab of
-                Items ->
-                    { model | items = newManifest }
+    case msg of
+        NoOp ->
+            model
 
-                Locations ->
-                    { model | locations = newManifest }
+        ChangeActiveTab tabName ->
+            { model
+                | activeTab = tabName
+                , focusedEntity = Nothing
+            }
 
-                Characters ->
-                    { model | characters = newManifest }
-    in
-        case msg of
-            NoOp ->
-                model
-
-            ChangeActiveTab tabName ->
-                { model | activeTab = tabName, attributeEditor = Nothing }
-
-            ChangeFocusedItem focusedItemId ->
-                let
-                    newEditor =
-                        activeManifest model
-                            |> Manifest.get focusedItemId
-                            |> Maybe.andThen
-                                (\{ name, description } ->
-                                    Just <| AttributeEditor focusedItemId name description
+        ChangeFocusedEntity focusedEntity ->
+            let
+                currentEntities =
+                    getActiveEntities model
+            in
+                { model
+                    | focusedEntity =
+                        Just
+                            { entityId = focusedEntity
+                            , editor =
+                                (Entity.getComponents
+                                    (Dict.get focusedEntity currentEntities
+                                        |> Maybe.withDefault Entity.empty
+                                    )
                                 )
-                in
-                    { model | attributeEditor = newEditor }
+                                -- TODO , maybe just crash?
+                            }
+                }
 
-            UpdateName newName ->
-                let
-                    newEditor { itemId, displayName, description } =
-                        AttributeEditor itemId newName description
-                in
-                    { model | attributeEditor = Maybe.map newEditor model.attributeEditor }
+        SaveEntity ->
+            case model.focusedEntity of
+                Just { entityId, editor } ->
+                    case model.activeTab of
+                        ItemsTab ->
+                            { model | items = Dict.insert entityId (Entity.update Entity.empty editor) model.items }
 
-            UpdateDescription newDescription ->
-                let
-                    newEditor editor =
-                        { editor | description = newDescription }
-                in
-                    { model | attributeEditor = Maybe.map newEditor model.attributeEditor }
+                        LocationsTab ->
+                            { model | locations = Dict.insert entityId (Entity.update Entity.empty editor) model.locations }
 
-            Save ->
-                activeManifest model
-                    |> \manifest ->
-                        -- placeholder for now, crash on nonunique id
-                        case
-                            Manifest.save model.attributeEditor manifest
-                        of
-                            Err error ->
-                                Debug.crash error
+                        CharactersTab ->
+                            { model | characters = Dict.insert entityId (Entity.update Entity.empty editor) model.characters }
 
-                            Ok manifest ->
-                                saveActiveManifest manifest
+                _ ->
+                    model
 
-            Create ->
-                { model | attributeEditor = Just <| AttributeEditor (model.lastId + 1) "" "", lastId = model.lastId + 1 }
+        NewEntity ->
+            let
+                newId =
+                    model.lastId + 1
+            in
+                { model
+                    | focusedEntity =
+                        Just
+                            { entityId = Entity.newEntityId model.activeTab newId
+                            , editor = Dict.singleton "display" (Display { name = "", description = "" })
+                            }
+                    , lastId = newId
+                }
+
+        UpdateEditor componentName f newVal ->
+            let
+                updateHelper focusedEntity =
+                    { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
+            in
+                ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
+
+        AddComponent name component ->
+            let
+                updateHelper focusedEntity =
+                    { focusedEntity | editor = Dict.insert name component focusedEntity.editor }
+            in
+                ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
 
 
 view : Model -> Html Msg
 view model =
-    Views.Layout.view (activeManifest model) model.attributeEditor
-
-
-
--- HELPERS
-
-
-activeManifest : Model -> Manifest.Manifest
-activeManifest model =
-    case model.activeTab of
-        Items ->
-            model.items
-
-        Locations ->
-            model.locations
-
-        Characters ->
-            model.characters
+    Views.Layout.view (getActiveEntities model) model.focusedEntity
