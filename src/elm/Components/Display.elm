@@ -3,7 +3,7 @@ module Components.Display exposing (..)
 import Types exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onBlur)
 
 
 view : String -> Component -> Html Msg
@@ -36,6 +36,7 @@ view componentName component =
                             , value name
                             , onInput <|
                                 UpdateEditor componentName updateName
+                            , onBlur SaveEntity
                             ]
                             []
                         ]
@@ -48,6 +49,7 @@ view componentName component =
                             , value description
                             , onInput <|
                                 UpdateEditor componentName updateDescription
+                            , onBlur SaveEntity
                             ]
                             []
                         ]

@@ -29,7 +29,7 @@ type Msg
     | SaveEntity
     | NewEntity
     | UpdateEditor String (String -> Component) String
-    | AddComponent String Component
+    | AddComponent String
 
 
 type alias Components =

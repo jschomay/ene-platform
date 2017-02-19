@@ -17,13 +17,24 @@ view componentName component =
             Components.Style.view componentName component
 
 
+
+-- TODO: figure out where the list of components should live
+
+
+allAvailableComponents : Components
+allAvailableComponents =
+    Dict.fromList
+        [ ( "display", Display { name = "", description = "" } )
+        , ( "style", Style { selector = "" } )
+        ]
+
+
 getAvailableComponents : Components -> Components
 getAvailableComponents components =
-    let
-        allAvailableComponents =
-            Dict.fromList
-                [ ( "display", Display { name = "", description = "" } )
-                , ( "style", Style { selector = "" } )
-                ]
-    in
-        Dict.diff allAvailableComponents components
+    Dict.diff allAvailableComponents components
+
+
+getComponent : String -> Maybe Component
+getComponent name =
+    allAvailableComponents
+        |> Dict.get name

@@ -6,6 +6,7 @@ import Views.Layout
 import Dict exposing (Dict)
 import Entity exposing (..)
 import Encode
+import Component
 
 
 -- APP
@@ -151,12 +152,26 @@ update msg model =
             in
                 ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
 
-        AddComponent name component ->
+        AddComponent name ->
             let
+                component =
+                    Component.getComponent name
+
                 updateHelper focusedEntity =
-                    { focusedEntity | editor = Dict.insert name component focusedEntity.editor }
+                    case component of
+                        Nothing ->
+                            -- TODO: figure out a better way to handle all this
+                            Debug.crash "Could not find the component..."
+
+                        Just component ->
+                            { focusedEntity | editor = Dict.insert name component focusedEntity.editor }
             in
-                ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
+                case name of
+                    "" ->
+                        model
+
+                    _ ->
+                        ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
 
 
 view : Model -> Html Msg

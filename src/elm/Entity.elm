@@ -11,9 +11,10 @@ module Entity
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput, onClick)
+import Html.Events exposing (onInput, onClick, on, targetValue)
 import Types exposing (..)
 import Component
+import Json.Decode as Decode
 
 
 empty : Entity
@@ -44,39 +45,33 @@ getComponents (Entity components) =
 editorView : Components -> List (Html Msg)
 editorView components =
     let
-        submitButton =
-            case Dict.size components of
-                0 ->
-                    []
+        availableComponents =
+            Component.getAvailableComponents components
 
-                _ ->
-                    [ button [ onClick SaveEntity ] [ text "submit" ] ]
+        onSelect =
+            -- becuase of https://github.com/elm-lang/html/issues/71
+            on "change" (Decode.map AddComponent Html.Events.targetValue)
+
+        addComponentView =
+            let
+                addComponentRenderer ( name, component ) =
+                    option [ value name ] [ text name ]
+            in
+                Dict.toList availableComponents
+                    |> List.map addComponentRenderer
+                    |> (::) (option [ selected True, value "" ] [ text "Add Component " ])
+                    |> select [ onSelect, class "addComponent" ]
+
+        componentDropdown =
+            if Dict.size availableComponents > 0 then
+                addComponentView
+            else
+                div [] []
     in
-        addComponentView components
+        componentDropdown
             :: (Dict.values <|
                     Dict.map Component.view components
                )
-            ++ submitButton
-
-
-addComponentView : Components -> Html Msg
-addComponentView existingComponents =
-    let
-        availableComponents =
-            Component.getAvailableComponents existingComponents
-
-        addComponentRenderer ( name, component ) =
-            div []
-                [ button
-                    [ onClick <|
-                        AddComponent name component
-                    ]
-                    [ text <| "add " ++ name ]
-                ]
-    in
-        Dict.toList availableComponents
-            |> List.map addComponentRenderer
-            |> div [ class "addComponent" ]
 
 
 newEntityId : TabName -> Int -> String
