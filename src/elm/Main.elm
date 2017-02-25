@@ -5,6 +5,7 @@ import Types exposing (..)
 import Views.Layout
 import Dict exposing (Dict)
 import Entity exposing (..)
+import Encode
 
 
 -- APP
@@ -26,25 +27,39 @@ type alias Model =
             { entityId : String
             , editor : Components
             }
+    , exportJson : String
     }
 
 
 init : Model
 init =
-    Model
-        (Dict.singleton "items1" <| Entity.init (Dict.singleton "display" (Display { name = "item1", description = "my item" })))
-        (Dict.singleton "locations1" <|
-            Entity.init
-                (Dict.fromList
-                    [ ( "display", Display { name = "location1", description = "my location" } )
-                    , ( "style", Style { selector = "mySelector" } )
-                    ]
-                )
-        )
-        (Dict.singleton "characters1" Entity.empty)
-        ItemsTab
-        3
-        Nothing
+    let
+        items =
+            (Dict.singleton "items1" <| Entity.init (Dict.singleton "display" (Display { name = "item1", description = "my item" })))
+
+        locations =
+            (Dict.singleton "locations1" <|
+                Entity.init
+                    (Dict.fromList
+                        [ ( "display", Display { name = "location1", description = "my location" } )
+                        , ( "style", Style { selector = "mySelector" } )
+                        ]
+                    )
+            )
+
+        characters =
+            (Dict.singleton "characters1" Entity.empty)
+    in
+        Model
+            items
+            locations
+            characters
+            ItemsTab
+            3
+            Nothing
+        <|
+            Encode.toJson
+                { items = items, locations = locations, characters = characters }
 
 
 
@@ -96,20 +111,24 @@ update msg model =
                 }
 
         SaveEntity ->
-            case model.focusedEntity of
-                Just { entityId, editor } ->
-                    case model.activeTab of
-                        ItemsTab ->
-                            { model | items = Dict.insert entityId (Entity.update Entity.empty editor) model.items }
+            let
+                newModel =
+                    case model.focusedEntity of
+                        Just { entityId, editor } ->
+                            case model.activeTab of
+                                ItemsTab ->
+                                    { model | items = Dict.insert entityId (Entity.update Entity.empty editor) model.items }
 
-                        LocationsTab ->
-                            { model | locations = Dict.insert entityId (Entity.update Entity.empty editor) model.locations }
+                                LocationsTab ->
+                                    { model | locations = Dict.insert entityId (Entity.update Entity.empty editor) model.locations }
 
-                        CharactersTab ->
-                            { model | characters = Dict.insert entityId (Entity.update Entity.empty editor) model.characters }
+                                CharactersTab ->
+                                    { model | characters = Dict.insert entityId (Entity.update Entity.empty editor) model.characters }
 
-                _ ->
-                    model
+                        _ ->
+                            model
+            in
+                ({ newModel | exportJson = Encode.toJson newModel })
 
         NewEntity ->
             let
@@ -142,4 +161,4 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Views.Layout.view (getActiveEntities model) model.focusedEntity
+    Views.Layout.view model.exportJson (getActiveEntities model) model.focusedEntity

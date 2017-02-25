@@ -98,7 +98,7 @@ body {
   flex: 1 1 0px;
 }
 
-.attributes button {
+.attributes button, .export {
   display: inline-block;
   font-size: inherit;
   padding: 10px;

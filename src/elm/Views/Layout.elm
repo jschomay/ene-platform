@@ -6,13 +6,21 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Entity as Entity
 import Dict exposing (Dict)
+import Http exposing (encodeUri)
 
 
-view : Dict String Entity -> Maybe { entityId : String, editor : Components } -> Html Msg
-view items focusedEntity =
+view : String -> Dict String Entity -> Maybe { entityId : String, editor : Components } -> Html Msg
+view exportJson items focusedEntity =
     div [ class "editor" ]
         [ div [ class "editor__header" ] <| headerView
         , div [ class "editor__content" ] <| contentView items focusedEntity
+        , a
+            [ type_ "button"
+            , href <| "data:text/plain;charset=utf-8," ++ encodeUri exportJson
+            , downloadAs "output.json"
+            , class "export"
+            ]
+            [ button [] [ text "Download" ] ]
         ]
 
 
