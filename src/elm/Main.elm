@@ -39,13 +39,19 @@ init =
             (Dict.singleton "items1" <| Entity.init (Dict.singleton "display" (Display { name = "item1", description = "my item" })))
 
         locations =
-            (Dict.singleton "locations1" <|
-                Entity.init
-                    (Dict.fromList
-                        [ ( "display", Display { name = "location1", description = "my location" } )
-                        , ( "style", Style { selector = "mySelector" } )
-                        ]
-                    )
+            (Dict.fromList
+                [ ( "locations1"
+                  , Entity.init
+                        (Dict.fromList
+                            [ ( "display", Display { name = "location1", description = "my location" } )
+                            , ( "style", Style { selector = "mySelector" } )
+                            ]
+                        )
+                  )
+                , ( "locations2"
+                  , Entity.empty
+                  )
+                ]
             )
 
         characters =
@@ -82,96 +88,109 @@ getActiveEntities model =
 
 update : Msg -> Model -> Model
 update msg model =
-    case msg of
-        NoOp ->
-            model
+    let
+        currentEntities =
+            getActiveEntities model
 
-        ChangeActiveTab tabName ->
+        changeFocusedEntity focusedEntity model =
             { model
-                | activeTab = tabName
-                , focusedEntity = Nothing
+                | focusedEntity =
+                    Just
+                        { entityId = focusedEntity
+                        , editor =
+                            (Entity.getComponents
+                                (Dict.get focusedEntity currentEntities
+                                    |> Maybe.withDefault Entity.empty
+                                )
+                            )
+                            -- TODO , maybe just crash?
+                        }
             }
 
-        ChangeFocusedEntity focusedEntity ->
-            let
-                currentEntities =
-                    getActiveEntities model
-            in
+        updateActiveEntityCollection entityId newEntity =
+            case model.activeTab of
+                ItemsTab ->
+                    { model | items = Dict.insert entityId newEntity model.items }
+
+                LocationsTab ->
+                    { model | locations = Dict.insert entityId newEntity model.locations }
+
+                CharactersTab ->
+                    { model | characters = Dict.insert entityId newEntity model.characters }
+    in
+        case msg of
+            NoOp ->
+                model
+
+            ChangeActiveTab tabName ->
                 { model
-                    | focusedEntity =
-                        Just
-                            { entityId = focusedEntity
-                            , editor =
-                                (Entity.getComponents
-                                    (Dict.get focusedEntity currentEntities
-                                        |> Maybe.withDefault Entity.empty
-                                    )
-                                )
-                                -- TODO , maybe just crash?
-                            }
+                    | activeTab = tabName
+                    , focusedEntity = Nothing
                 }
 
-        SaveEntity ->
-            let
-                newModel =
-                    case model.focusedEntity of
-                        Just { entityId, editor } ->
-                            case model.activeTab of
-                                ItemsTab ->
-                                    { model | items = Dict.insert entityId (Entity.update Entity.empty editor) model.items }
+            ChangeFocusedEntity focusedEntity ->
+                changeFocusedEntity focusedEntity model
 
-                                LocationsTab ->
-                                    { model | locations = Dict.insert entityId (Entity.update Entity.empty editor) model.locations }
+            UnfocusEntity ->
+                { model | focusedEntity = Nothing }
 
-                                CharactersTab ->
-                                    { model | characters = Dict.insert entityId (Entity.update Entity.empty editor) model.characters }
+            SaveEntity ->
+                let
+                    newModel =
+                        case model.focusedEntity of
+                            Just { entityId, editor } ->
+                                updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
+
+                            _ ->
+                                model
+                in
+                    ({ newModel | exportJson = Encode.toJson newModel })
+
+            NewEntity ->
+                let
+                    newId =
+                        model.lastId + 1
+
+                    newEntityId =
+                        Entity.newEntityId model.activeTab newId
+
+                    newModel =
+                        updateActiveEntityCollection newEntityId Entity.empty
+                in
+                    changeFocusedEntity newEntityId newModel
+                        |> (\model ->
+                                { model
+                                    | lastId = newId
+                                }
+                           )
+
+            UpdateEditor componentName f newVal ->
+                let
+                    updateHelper focusedEntity =
+                        { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
+                in
+                    ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
+
+            AddComponent name ->
+                let
+                    component =
+                        Component.getComponent name
+
+                    updateHelper focusedEntity =
+                        case component of
+                            Nothing ->
+                                -- TODO: figure out a better way to handle all this
+                                Debug.crash "Could not find the component..."
+
+                            Just component ->
+                                { focusedEntity | editor = Dict.insert name component focusedEntity.editor }
+                in
+                    case name of
+                        "" ->
+                            model
 
                         _ ->
-                            model
-            in
-                ({ newModel | exportJson = Encode.toJson newModel })
-
-        NewEntity ->
-            let
-                newId =
-                    model.lastId + 1
-            in
-                { model
-                    | focusedEntity =
-                        Just
-                            { entityId = Entity.newEntityId model.activeTab newId
-                            , editor = Dict.singleton "display" (Display { name = "", description = "" })
-                            }
-                    , lastId = newId
-                }
-
-        UpdateEditor componentName f newVal ->
-            let
-                updateHelper focusedEntity =
-                    { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
-            in
-                ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
-
-        AddComponent name ->
-            let
-                component =
-                    Component.getComponent name
-
-                updateHelper focusedEntity =
-                    case component of
-                        Nothing ->
-                            -- TODO: figure out a better way to handle all this
-                            Debug.crash "Could not find the component..."
-
-                        Just component ->
-                            { focusedEntity | editor = Dict.insert name component focusedEntity.editor }
-            in
-                case name of
-                    "" ->
-                        model
-
-                    _ ->
-                        ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
+                            ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
 
 
 view : Model -> Html Msg

@@ -26,6 +26,7 @@ type Msg
     = NoOp
     | ChangeActiveTab TabName
     | ChangeFocusedEntity String
+    | UnfocusEntity
     | SaveEntity
     | NewEntity
     | UpdateEditor String (String -> Component) String

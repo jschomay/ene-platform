@@ -13,7 +13,7 @@ view : String -> Dict String Entity -> Maybe { entityId : String, editor : Compo
 view exportJson items focusedEntity =
     div [ class "editor" ]
         [ div [ class "editor__header" ] <| headerView
-        , div [ class "editor__content" ] <| contentView items focusedEntity
+        , div [ class "editor__content" ] <| accordionView items focusedEntity
         , a
             [ type_ "button"
             , href <| "data:text/plain;charset=utf-8," ++ encodeUri exportJson
@@ -22,19 +22,6 @@ view exportJson items focusedEntity =
             ]
             [ text "Download" ]
         ]
-
-
-contentView : Dict String Entity -> Maybe { entityId : String, editor : Components } -> List (Html Msg)
-contentView items focusedEntity =
-    [ div [ class "sidebar" ] <| sidebarView items
-    , div [ class "attributes" ] <|
-        case focusedEntity of
-            Nothing ->
-                [ text "Hey, make something useful" ]
-
-            Just { entityId, editor } ->
-                Entity.editorView editor
-    ]
 
 
 headerView : List (Html Msg)
@@ -70,3 +57,49 @@ sidebarView items =
             Dict.values <| Dict.map sidebarEntity <| items
     in
         existingSidebarEntity ++ sidebarAddEntity
+
+
+accordionView : Dict String Entity -> Maybe { entityId : String, editor : Components } -> List (Html Msg)
+accordionView entities focusedEntity =
+    let
+        focusedEntityId =
+            Maybe.withDefault
+                { entityId = "", editor = Dict.empty }
+                focusedEntity
+                |> .entityId
+
+        classes baseClass entityId =
+            [ ( baseClass, True )
+            , ( "active", entityId == focusedEntityId )
+            ]
+
+        editorView id =
+            case focusedEntity of
+                Nothing ->
+                    [ div [] [ text "nothing here" ] ]
+
+                Just { entityId, editor } ->
+                    Entity.editorView editor
+
+        clickEvent id =
+            if id == focusedEntityId then
+                UnfocusEntity
+            else
+                ChangeFocusedEntity id
+
+        accordionItem id entity =
+            div [ class "entity" ]
+                [ div [ classList <| classes "accordionButton" id, onClick <| clickEvent id ] [ text <| Entity.entityTitle id entity ]
+                , div [ classList <| classes "accordionPanel" id ]
+                    (editorView id)
+                ]
+
+        accordionItems =
+            Dict.values <| Dict.map accordionItem <| entities
+
+        newItem =
+            [ div [ class "entity" ]
+                [ div [ class "accordionButton", onClick NewEntity ] [ text "Add new" ] ]
+            ]
+    in
+        accordionItems ++ newItem

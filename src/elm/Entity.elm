@@ -6,6 +6,7 @@ module Entity
         , getComponents
         , editorView
         , newEntityId
+        , entityTitle
         )
 
 import Dict exposing (Dict)
@@ -80,6 +81,13 @@ newEntityId tabName newId =
         |> String.dropRight 3
         |> String.toLower
         |> (flip (++)) (toString newId)
+
+
+entityTitle : String -> Entity -> String
+entityTitle defaultTitle entity =
+    getComponents entity
+        |> Component.getDefaultTitle
+        |> Maybe.withDefault defaultTitle
 
 
 

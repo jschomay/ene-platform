@@ -23,14 +23,10 @@ body {
 
 .editor__content {
   display: flex;
-}
-
-
-.sidebar {
-  display: flex;
   flex-direction: column;
-  min-width: 10%;
 }
+
+
 
 .editor__header {
   display: flex;
@@ -44,18 +40,7 @@ body {
   border-bottom: none;
 }
 
-.sidebar__item, .sidebar__new {
-  padding: 10px;
-  border: 1px solid #ABC9D4;
-}
 
-.attributes {
-  display: flex;
-  flex-direction: column;
-  padding: 50px;
-  flex-grow: 1;
-  border: 1px solid #ABC9D4;
-}
 
 .attributesEditor {
   display: flex;
@@ -108,3 +93,27 @@ body {
   text-decoration: none;
 }
 
+.accordionPanel {
+  display: none;
+}
+
+.accordionPanel.active {
+  display: block;
+}
+
+.accordionButton {
+  border: 1px solid;
+  padding: 10px;
+  border: 1px solid #ABC9D4;
+  background-color: #193441;
+  display: flex;
+  justify-content: space-between;
+}
+
+.accordionButton:after {
+  content: "+"
+}
+
+.accordionButton.active {
+  background-color: #CBB074;
+}
