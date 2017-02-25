@@ -20,7 +20,7 @@ view exportJson items focusedEntity =
             , downloadAs "output.json"
             , class "export"
             ]
-            [ button [] [ text "Download" ] ]
+            [ text "Download" ]
         ]
 
 
