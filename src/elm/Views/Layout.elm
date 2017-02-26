@@ -9,10 +9,10 @@ import Dict exposing (Dict)
 import Http exposing (encodeUri)
 
 
-view : String -> Dict String Entity -> Maybe { entityId : String, editor : Components } -> Html Msg
-view exportJson items focusedEntity =
+view : TabName -> String -> Dict String Entity -> Maybe { entityId : String, editor : Components } -> Html Msg
+view activeTab exportJson items focusedEntity =
     div [ class "editor" ]
-        [ div [ class "editor__header" ] <| headerView
+        [ div [ class "editor__header" ] <| headerView activeTab
         , div [ class "editor__content" ] <| accordionView items focusedEntity
         , a
             [ type_ "button"
@@ -24,39 +24,28 @@ view exportJson items focusedEntity =
         ]
 
 
-headerView : List (Html Msg)
-headerView =
-    [ div
-        [ class "headerTab"
-        , onClick <| ChangeActiveTab ItemsTab
-        ]
-        [ text "Items" ]
-    , div
-        [ class "headerTab"
-        , onClick <| ChangeActiveTab LocationsTab
-        ]
-        [ text "Locations" ]
-    , div
-        [ class "headerTab"
-        , onClick <| ChangeActiveTab CharactersTab
-        ]
-        [ text "Characters" ]
-    ]
-
-
-sidebarView : Dict String Entity -> List (Html Msg)
-sidebarView items =
+headerView : TabName -> List (Html Msg)
+headerView activeTab =
     let
-        sidebarEntity id _ =
-            div [ class "sidebar__item", onClick <| ChangeFocusedEntity id ] [ text id ]
-
-        sidebarAddEntity =
-            [ div [ class "sidebar__new", onClick NewEntity ] [ text "+" ] ]
-
-        existingSidebarEntity =
-            Dict.values <| Dict.map sidebarEntity <| items
+        classes active =
+            classList [ ( "headerTab", True ), ( "headerTab--active", active ) ]
     in
-        existingSidebarEntity ++ sidebarAddEntity
+        [ div
+            [ classes <| activeTab == ItemsTab
+            , onClick <| ChangeActiveTab ItemsTab
+            ]
+            [ text "Items" ]
+        , div
+            [ classes <| activeTab == LocationsTab
+            , onClick <| ChangeActiveTab LocationsTab
+            ]
+            [ text "Locations" ]
+        , div
+            [ classes <| activeTab == CharactersTab
+            , onClick <| ChangeActiveTab CharactersTab
+            ]
+            [ text "Characters" ]
+        ]
 
 
 accordionView : Dict String Entity -> Maybe { entityId : String, editor : Components } -> List (Html Msg)
@@ -69,9 +58,10 @@ accordionView entities focusedEntity =
                 |> .entityId
 
         classes baseClass entityId =
-            [ ( baseClass, True )
-            , ( "active", entityId == focusedEntityId )
-            ]
+            classList
+                [ ( baseClass, True )
+                , ( baseClass ++ "--active", entityId == focusedEntityId )
+                ]
 
         editorView id =
             case focusedEntity of
@@ -89,8 +79,12 @@ accordionView entities focusedEntity =
 
         accordionItem id entity =
             div [ class "entity" ]
-                [ div [ classList <| classes "accordionButton" id, onClick <| clickEvent id ] [ text <| Entity.entityTitle id entity ]
-                , div [ classList <| classes "accordionPanel" id ]
+                [ div
+                    [ classes "accordionButton" id
+                    , onClick <| clickEvent id
+                    ]
+                    [ text <| Entity.entityTitle id entity ]
+                , div [ classes "accordionPanel" id ]
                     (editorView id)
                 ]
 

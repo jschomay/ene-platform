@@ -195,4 +195,4 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Views.Layout.view model.exportJson (getActiveEntities model) model.focusedEntity
+    Views.Layout.view model.activeTab model.exportJson (getActiveEntities model) model.focusedEntity

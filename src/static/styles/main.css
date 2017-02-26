@@ -38,9 +38,14 @@ body {
   border: 1px solid #ABC9D4;
   padding: 20px;
   border-bottom: none;
+  flex: 1;
+  text-align: center;
 }
 
 
+.headerTab--active {
+  background-color: #CBB074;
+}
 
 .attributesEditor {
   display: flex;
@@ -97,7 +102,7 @@ body {
   display: none;
 }
 
-.accordionPanel.active {
+.accordionPanel--active {
   display: block;
 }
 
@@ -114,6 +119,7 @@ body {
   content: "+"
 }
 
-.accordionButton.active {
+.accordionButton--active {
   background-color: #CBB074;
 }
+
