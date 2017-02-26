@@ -77,7 +77,7 @@ accordionView entities focusedEntity =
             else
                 ChangeFocusedEntity id
 
-        accordionItem id entity =
+        accordionItem ( id, entity ) =
             div [ class "entity" ]
                 [ div
                     [ classes "accordionButton" id
@@ -89,8 +89,12 @@ accordionView entities focusedEntity =
                 ]
 
         accordionItems =
-            Dict.values <| Dict.map accordionItem <| entities
+            entities
+                |> Dict.toList
+                |> List.sortBy (uncurry Entity.entityTitle)
+                |> List.map accordionItem
 
+        -- Dict.values <| Dict.map accordionItem <| entities
         newItem =
             [ div [ class "entity" ]
                 [ div [ class "accordionButton", onClick NewEntity ] [ text "Add new" ] ]
