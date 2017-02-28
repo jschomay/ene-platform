@@ -28,7 +28,6 @@ type alias Model =
             { entityId : String
             , editor : Components
             }
-    , exportJson : String
     }
 
 
@@ -64,9 +63,6 @@ init =
             ItemsTab
             3
             Nothing
-        <|
-            Encode.toJson
-                { items = items, locations = locations, characters = characters }
 
 
 
@@ -135,16 +131,12 @@ update msg model =
                 { model | focusedEntity = Nothing }
 
             SaveEntity ->
-                let
-                    newModel =
-                        case model.focusedEntity of
-                            Just { entityId, editor } ->
-                                updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
+                case model.focusedEntity of
+                    Just { entityId, editor } ->
+                        updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
 
-                            _ ->
-                                model
-                in
-                    ({ newModel | exportJson = Encode.toJson newModel })
+                    _ ->
+                        model
 
             NewEntity ->
                 let
@@ -195,4 +187,9 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Views.Layout.view model.activeTab model.exportJson (getActiveEntities model) model.focusedEntity
+    let
+        exportData =
+            Encode.toJson
+                { items = model.items, locations = model.locations, characters = model.characters }
+    in
+        Views.Layout.view model.activeTab exportData (getActiveEntities model) model.focusedEntity
