@@ -123,3 +123,46 @@ body {
   background-color: #CBB074;
 }
 
+.accordionPanel input, .accordionPanel textarea {
+  font-size:18px;
+  padding:10px 10px 10px 5px;
+  display:block;
+  width:300px;
+  border:none;
+  border-bottom:1px solid #ABC9D4;
+  background: transparent;
+  color: inherit;
+}
+
+.accordionPanel input:focus, .accordionPanel textarea:focus {
+  outline:none; 
+  border-color: #FCFFF8;
+}
+
+.attributesEditor__item {
+  display: flex;
+  margin-bottom: 50px;
+}
+
+.attributesEditor__item label {
+  flex: 0 1 150px;
+}
+
+.attributesEditor__item input {
+  flex: 1 1 0px;
+}
+
+.attributesEditor__item textarea {
+  flex: 1 1 0px;
+}
+
+.accordionPanel button, .export {
+  display: inline-block;
+  font-size: inherit;
+  padding: 10px;
+  border: 1px solid #ABC9D4;
+  background-color: #193441;
+  color: #FCFFF5;
+  text-decoration: none;
+}
+
