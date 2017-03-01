@@ -31,6 +31,7 @@ type Msg
     | NewEntity
     | UpdateEditor String (String -> Component) String
     | AddComponent String
+    | ToggleComponentDropdown
 
 
 type alias Components =

@@ -9,7 +9,7 @@ import Dict exposing (Dict)
 import Http exposing (encodeUri)
 
 
-view : TabName -> String -> Dict String Entity -> Maybe { entityId : String, editor : Components } -> Html Msg
+view : TabName -> String -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> Html Msg
 view activeTab exportJson items focusedEntity =
     div [ class "editor" ]
         [ div [ class "editor__header" ] <| headerView activeTab
@@ -48,12 +48,12 @@ headerView activeTab =
         ]
 
 
-accordionView : Dict String Entity -> Maybe { entityId : String, editor : Components } -> List (Html Msg)
+accordionView : Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> List (Html Msg)
 accordionView entities focusedEntity =
     let
         focusedEntityId =
             Maybe.withDefault
-                { entityId = "", editor = Dict.empty }
+                { entityId = "", editor = Dict.empty, showingComponents = False }
                 focusedEntity
                 |> .entityId
 
@@ -68,8 +68,8 @@ accordionView entities focusedEntity =
                 Nothing ->
                     [ div [] [ text "nothing here" ] ]
 
-                Just { entityId, editor } ->
-                    Entity.editorView editor
+                Just { entityId, editor, showingComponents } ->
+                    Entity.editorView editor showingComponents
 
         clickEvent id =
             if id == focusedEntityId then

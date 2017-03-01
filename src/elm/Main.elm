@@ -27,6 +27,7 @@ type alias Model =
         Maybe
             { entityId : String
             , editor : Components
+            , showingComponents : Bool
             }
     }
 
@@ -99,6 +100,8 @@ update msg model =
                                     |> Maybe.withDefault Entity.empty
                                 )
                             )
+                        , showingComponents =
+                            False
                             -- TODO , maybe just crash?
                         }
             }
@@ -175,7 +178,9 @@ update msg model =
                                 Debug.crash "Could not find the component..."
 
                             Just component ->
-                                { focusedEntity | editor = Dict.insert name component focusedEntity.editor }
+                                { focusedEntity
+                                    | editor = Dict.insert name component focusedEntity.editor
+                                }
                 in
                     case name of
                         "" ->
@@ -183,6 +188,18 @@ update msg model =
 
                         _ ->
                             ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
+
+            ToggleComponentDropdown ->
+                let
+                    updateFocusedEntity =
+                        case model.focusedEntity of
+                            Nothing ->
+                                Nothing
+
+                            Just focusedEntity ->
+                                Just { focusedEntity | showingComponents = not focusedEntity.showingComponents }
+                in
+                    ({ model | focusedEntity = updateFocusedEntity })
 
 
 view : Model -> Html Msg

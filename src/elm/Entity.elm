@@ -43,11 +43,14 @@ getComponents (Entity components) =
 -- TODO: test the update editor functions
 
 
-editorView : Components -> List (Html Msg)
-editorView components =
+editorView : Components -> Bool -> List (Html Msg)
+editorView components showingComponents =
     let
         availableComponents =
             Component.getAvailableComponents components
+
+        componentOptionClasses =
+            classList [ ( "addComponent__item", True ), ( "addComponent__item--visible", showingComponents ) ]
 
         onSelect =
             -- becuase of https://github.com/elm-lang/html/issues/71
@@ -56,12 +59,12 @@ editorView components =
         addComponentView =
             let
                 addComponentRenderer ( name, component ) =
-                    option [ value name ] [ text name ]
+                    div [ componentOptionClasses, onClick <| AddComponent name ] [ text name ]
             in
                 Dict.toList availableComponents
                     |> List.map addComponentRenderer
-                    |> (::) (option [ selected True, value "" ] [ text "Add Component " ])
-                    |> select [ onSelect, class "addComponent" ]
+                    |> (::) (div [ class "addComponent__dropdown", onClick ToggleComponentDropdown ] [ text "Add Component" ])
+                    |> div [ class "addComponent" ]
 
         componentDropdown =
             if Dict.size availableComponents > 0 then

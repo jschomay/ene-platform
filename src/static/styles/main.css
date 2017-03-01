@@ -166,3 +166,18 @@ body {
   text-decoration: none;
 }
 
+.addComponent__item {
+  display: none;
+}
+
+.addComponent__item--visible {
+  display: block;
+}
+
+.addComponent {
+  padding: 10px;
+  border: 1px solid #ABC9D4;
+  background-color: #193441;
+  margin: 10px;
+  width: 10%;
+}
