@@ -57,3 +57,13 @@ view componentName component =
 
             _ ->
                 div [] []
+
+
+getTitle : Maybe Component -> Maybe String
+getTitle component =
+    case component of
+        Just (Display { name }) ->
+            Just name
+
+        _ ->
+            Nothing

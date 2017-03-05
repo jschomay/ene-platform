@@ -89,7 +89,7 @@ newEntityId tabName newId =
 entityTitle : String -> Entity -> String
 entityTitle defaultTitle entity =
     getComponents entity
-        |> Component.getDefaultTitle
+        |> Component.getTitle
         |> Maybe.withDefault defaultTitle
 
 
