@@ -40,18 +40,6 @@ getComponent name =
         |> Dict.get name
 
 
-getDefaultTitle : Components -> Maybe String
-getDefaultTitle components =
-    let
-        titleComponent =
-            Dict.get "display" components
-    in
-        case titleComponent of
-            Nothing ->
-                Nothing
-
-            Just (Display { name, description }) ->
-                Just name
-
-            _ ->
-                Nothing
+getTitle : Components -> Maybe String
+getTitle components =
+    Components.Display.getTitle <| Dict.get "display" components
