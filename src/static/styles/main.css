@@ -126,8 +126,6 @@ body {
 .accordionPanel input, .accordionPanel textarea {
   font-size:18px;
   padding:10px 10px 10px 5px;
-  display:block;
-  width:300px;
   border:none;
   border-bottom:1px solid #ABC9D4;
   background: transparent;
