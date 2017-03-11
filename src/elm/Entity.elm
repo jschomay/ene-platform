@@ -16,6 +16,7 @@ import Html.Events exposing (onInput, onClick, on, targetValue)
 import Types exposing (..)
 import Component
 import Json.Decode as Decode
+import Material
 
 
 empty : Entity
@@ -43,8 +44,8 @@ getComponents (Entity components) =
 -- TODO: test the update editor functions
 
 
-editorView : Components -> Bool -> List (Html Msg)
-editorView components showingComponents =
+editorView : Material.Model -> Components -> Bool -> List (Html Msg)
+editorView mdl components showingComponents =
     let
         availableComponents =
             Component.getAvailableComponents components
@@ -74,7 +75,7 @@ editorView components showingComponents =
     in
         componentDropdown
             :: (Dict.values <|
-                    Dict.map Component.view components
+                    Dict.map (Component.view mdl) components
                )
 
 

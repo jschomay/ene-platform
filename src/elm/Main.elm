@@ -7,6 +7,7 @@ import Dict exposing (Dict)
 import Entity exposing (..)
 import Encode
 import Component
+import Material
 
 
 -- APP
@@ -14,7 +15,16 @@ import Component
 
 main : Program Never Model Msg
 main =
-    Html.beginnerProgram { model = init, view = view, update = update }
+    Html.program { init = init, view = view, update = update, subscriptions = subscriptions }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
+
+--TODO: get rid of the editor and onInput sync the entity and then store it
 
 
 type alias Model =
@@ -29,10 +39,11 @@ type alias Model =
             , editor : Components
             , showingComponents : Bool
             }
+    , mdl : Material.Model
     }
 
 
-init : Model
+init : ( Model, Cmd Msg )
 init =
     let
         items =
@@ -57,13 +68,16 @@ init =
         characters =
             (Dict.singleton "characters1" Entity.empty)
     in
-        Model
-            items
-            locations
-            characters
-            ItemsTab
-            3
-            Nothing
+        ( { items = items
+          , locations = locations
+          , characters = characters
+          , activeTab = ItemsTab
+          , lastId = 3
+          , focusedEntity = Nothing
+          , mdl = Material.model
+          }
+        , Cmd.none
+        )
 
 
 
@@ -83,7 +97,7 @@ getActiveEntities model =
             model.characters
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         currentEntities =
@@ -119,27 +133,45 @@ update msg model =
     in
         case msg of
             NoOp ->
-                model
+                ( model, Cmd.none )
 
-            ChangeActiveTab tabName ->
-                { model
-                    | activeTab = tabName
-                    , focusedEntity = Nothing
-                }
+            ChangeActiveTab newTabIndex ->
+                let
+                    newActiveTab =
+                        case newTabIndex of
+                            0 ->
+                                ItemsTab
+
+                            1 ->
+                                LocationsTab
+
+                            _ ->
+                                CharactersTab
+                in
+                    ( { model
+                        | activeTab = newActiveTab
+                        , focusedEntity = Nothing
+                      }
+                    , Cmd.none
+                    )
 
             ChangeFocusedEntity focusedEntity ->
-                changeFocusedEntity focusedEntity model
+                ( changeFocusedEntity focusedEntity model, Cmd.none )
 
             UnfocusEntity ->
-                { model | focusedEntity = Nothing }
+                ( { model | focusedEntity = Nothing }, Cmd.none )
 
             SaveEntity ->
-                case model.focusedEntity of
-                    Just { entityId, editor } ->
-                        updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
+                let
+                    updatedModel =
+                        case model.focusedEntity of
+                            Just { entityId, editor } ->
+                                updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
 
-                    _ ->
-                        model
+                            _ ->
+                                model
+                in
+                    ( updatedModel, Cmd.none )
 
             NewEntity ->
                 let
@@ -152,19 +184,35 @@ update msg model =
                     newModel =
                         updateActiveEntityCollection newEntityId Entity.empty
                 in
-                    changeFocusedEntity newEntityId newModel
+                    ( changeFocusedEntity newEntityId newModel
                         |> (\model ->
                                 { model
                                     | lastId = newId
                                 }
                            )
+                    , Cmd.none
+                    )
 
             UpdateEditor componentName f newVal ->
                 let
                     updateHelper focusedEntity =
                         { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
+
+                    updateModel focusedEntity =
+                        case focusedEntity of
+                            Just { entityId, editor } ->
+                                updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
+                                    |> \model -> { model | focusedEntity = focusedEntity }
+
+                            _ ->
+                                model
+
+                    updatedModel =
+                        Maybe.map updateHelper model.focusedEntity
+                            |> updateModel
                 in
-                    ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
+                    -- TODO: refactor this bad boy, but for now just keeping forward
+                    ( updatedModel, Cmd.none )
 
             AddComponent name ->
                 let
@@ -180,14 +228,15 @@ update msg model =
                             Just component ->
                                 { focusedEntity
                                     | editor = Dict.insert name component focusedEntity.editor
+                                    , showingComponents = False
                                 }
                 in
                     case name of
                         "" ->
-                            model
+                            ( model, Cmd.none )
 
                         _ ->
-                            ({ model | focusedEntity = Maybe.map updateHelper model.focusedEntity })
+                            ( { model | focusedEntity = Maybe.map updateHelper model.focusedEntity }, Cmd.none )
 
             ToggleComponentDropdown ->
                 let
@@ -199,7 +248,10 @@ update msg model =
                             Just focusedEntity ->
                                 Just { focusedEntity | showingComponents = not focusedEntity.showingComponents }
                 in
-                    ({ model | focusedEntity = updateFocusedEntity })
+                    ( { model | focusedEntity = updateFocusedEntity }, Cmd.none )
+
+            Mdl message ->
+                Material.update Mdl message model
 
 
 view : Model -> Html Msg
@@ -209,4 +261,4 @@ view model =
             Encode.toJson
                 { items = model.items, locations = model.locations, characters = model.characters }
     in
-        Views.Layout.view model.activeTab exportData (getActiveEntities model) model.focusedEntity
+        Views.Layout.view model.mdl model.activeTab exportData (getActiveEntities model) model.focusedEntity

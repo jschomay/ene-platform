@@ -1,6 +1,7 @@
 module Types exposing (..)
 
 import Dict exposing (..)
+import Material
 
 
 type TabName
@@ -24,7 +25,7 @@ type Component
 
 type Msg
     = NoOp
-    | ChangeActiveTab TabName
+    | ChangeActiveTab Int
     | ChangeFocusedEntity String
     | UnfocusEntity
     | SaveEntity
@@ -32,6 +33,7 @@ type Msg
     | UpdateEditor String (String -> Component) String
     | AddComponent String
     | ToggleComponentDropdown
+    | Mdl (Material.Msg Msg)
 
 
 type alias Components =

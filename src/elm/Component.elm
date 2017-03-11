@@ -5,16 +5,17 @@ import Html exposing (Html)
 import Components.Display
 import Components.Style
 import Dict
+import Material
 
 
-view : String -> Component -> Html Msg
-view componentName component =
+view : Material.Model -> String -> Component -> Html Msg
+view mdl componentName component =
     case component of
         Display attributes ->
-            Components.Display.view componentName component
+            Components.Display.view mdl componentName component
 
         Style attributes ->
-            Components.Style.view componentName component
+            Components.Style.view mdl componentName component
 
 
 

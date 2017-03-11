@@ -7,49 +7,82 @@ import Html.Events exposing (..)
 import Entity as Entity
 import Dict exposing (Dict)
 import Http exposing (encodeUri)
+import Material.Grid exposing (..)
+import Material.Tabs as Tabs
+import Material.Options as Options
+import Material.Icon as Icon
+import Material
 
 
-view : TabName -> String -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> Html Msg
-view activeTab exportJson items focusedEntity =
-    div [ class "editor" ]
-        [ div [ class "editor__header" ] <| headerView activeTab
-        , div [ class "editor__content" ] <| accordionView items focusedEntity
-        , a
-            [ type_ "button"
-            , href <| "data:text/plain;charset=utf-8," ++ encodeUri exportJson
-            , downloadAs "output.json"
-            , class "export"
-            ]
-            [ text "Download" ]
-        ]
-
-
-headerView : TabName -> List (Html Msg)
-headerView activeTab =
+view : Material.Model -> TabName -> String -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> Html Msg
+view mdl activeTab exportJson items focusedEntity =
     let
-        classes active =
-            classList [ ( "headerTab", True ), ( "headerTab--active", active ) ]
+        activeTabIdx =
+            case activeTab of
+                ItemsTab ->
+                    0
+
+                LocationsTab ->
+                    1
+
+                CharactersTab ->
+                    2
     in
-        [ div
-            [ classes <| activeTab == ItemsTab
-            , onClick <| ChangeActiveTab ItemsTab
+        grid [ Options.css "justify-content" "space-around" ]
+            [ cell [ Material.Grid.size All 6 ]
+                [ div [ class "editor__header" ] <| headerView mdl activeTabIdx items focusedEntity
+                , a
+                    [ type_ "button"
+                    , href <| "data:text/plain;charset=utf-8," ++ encodeUri exportJson
+                    , downloadAs "output.json"
+                    , class "export"
+                    ]
+                    [ text "Download" ]
+                ]
             ]
-            [ text "Items" ]
-        , div
-            [ classes <| activeTab == LocationsTab
-            , onClick <| ChangeActiveTab LocationsTab
-            ]
-            [ text "Locations" ]
-        , div
-            [ classes <| activeTab == CharactersTab
-            , onClick <| ChangeActiveTab CharactersTab
-            ]
-            [ text "Characters" ]
+
+
+headerView : Material.Model -> Int -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> List (Html Msg)
+headerView mdl activeTab items focusedEntity =
+    [ Tabs.render Mdl
+        [ 0 ]
+        mdl
+        [ Tabs.activeTab activeTab
+        , Tabs.ripple
+        , Tabs.onSelectTab ChangeActiveTab
         ]
+        [ Tabs.label
+            [ Options.center ]
+            [ Icon.i "card_travel"
+            , Options.span [ Options.css "width" "4px" ] []
+            , text "Items"
+            ]
+        , Tabs.label
+            [ Options.center ]
+            [ Icon.i "my_location"
+            , Options.span [ Options.css "width" "4px" ] []
+            , text "Locations"
+            ]
+        , Tabs.label
+            [ Options.center ]
+            [ Icon.i "person"
+            , Options.span [ Options.css "width" "4px" ] []
+            , text "Characters"
+            ]
+        ]
+        [ Options.div
+            [ Options.css "margin" "24px auto"
+            , Options.css "flex-direction" "column"
+            , Options.css "flex" "1 1 0"
+            ]
+          <|
+            accordionView mdl items focusedEntity
+        ]
+    ]
 
 
-accordionView : Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> List (Html Msg)
-accordionView entities focusedEntity =
+accordionView : Material.Model -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> List (Html Msg)
+accordionView mdl entities focusedEntity =
     let
         focusedEntityId =
             Maybe.withDefault
@@ -69,7 +102,7 @@ accordionView entities focusedEntity =
                     [ div [] [ text "nothing here" ] ]
 
                 Just { entityId, editor, showingComponents } ->
-                    Entity.editorView editor showingComponents
+                    Entity.editorView mdl editor showingComponents
 
         clickEvent id =
             if id == focusedEntityId then
