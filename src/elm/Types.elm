@@ -28,7 +28,6 @@ type Msg
     | ChangeActiveTab Int
     | ChangeFocusedEntity String
     | UnfocusEntity
-    | SaveEntity
     | NewEntity
     | UpdateEditor String (String -> Component) String
     | AddComponent String

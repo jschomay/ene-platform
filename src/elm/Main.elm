@@ -161,18 +161,6 @@ update msg model =
             UnfocusEntity ->
                 ( { model | focusedEntity = Nothing }, Cmd.none )
 
-            SaveEntity ->
-                let
-                    updatedModel =
-                        case model.focusedEntity of
-                            Just { entityId, editor } ->
-                                updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
-
-                            _ ->
-                                model
-                in
-                    ( updatedModel, Cmd.none )
-
             NewEntity ->
                 let
                     newId =
