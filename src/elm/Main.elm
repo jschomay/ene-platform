@@ -36,7 +36,6 @@ type alias Model =
     , focusedEntity :
         Maybe
             { entityId : String
-            , editor : Components
             , showingComponents : Bool
             }
     , mdl : Material.Model
@@ -108,12 +107,6 @@ update msg model =
                 | focusedEntity =
                     Just
                         { entityId = focusedEntity
-                        , editor =
-                            (Entity.getComponents
-                                (Dict.get focusedEntity currentEntities
-                                    |> Maybe.withDefault Entity.empty
-                                )
-                            )
                         , showingComponents =
                             False
                             -- TODO , maybe just crash?
@@ -121,15 +114,17 @@ update msg model =
             }
 
         updateActiveEntityCollection entityId newEntity =
-            case model.activeTab of
-                ItemsTab ->
-                    { model | items = Dict.insert entityId newEntity model.items }
+            Debug.log "newEntity" newEntity
+                |> \newEntity ->
+                    case model.activeTab of
+                        ItemsTab ->
+                            { model | items = Dict.insert entityId newEntity model.items }
 
-                LocationsTab ->
-                    { model | locations = Dict.insert entityId newEntity model.locations }
+                        LocationsTab ->
+                            { model | locations = Dict.insert entityId newEntity model.locations }
 
-                CharactersTab ->
-                    { model | characters = Dict.insert entityId newEntity model.characters }
+                        CharactersTab ->
+                            { model | characters = Dict.insert entityId newEntity model.characters }
     in
         case msg of
             NoOp ->
@@ -161,18 +156,6 @@ update msg model =
             UnfocusEntity ->
                 ( { model | focusedEntity = Nothing }, Cmd.none )
 
-            SaveEntity ->
-                let
-                    updatedModel =
-                        case model.focusedEntity of
-                            Just { entityId, editor } ->
-                                updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
-
-                            _ ->
-                                model
-                in
-                    ( updatedModel, Cmd.none )
-
             NewEntity ->
                 let
                     newId =
@@ -196,10 +179,18 @@ update msg model =
             UpdateEditor componentName f newVal ->
                 let
                     updateModel focusedEntity =
-                        { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
-                            |> \{ entityId, editor, showingComponents } ->
-                                updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
-                                    |> \model -> { model | focusedEntity = Just { entityId = entityId, editor = editor, showingComponents = showingComponents } }
+                        updateActiveEntityCollection
+                            focusedEntity.entityId
+                            (Entity.update
+                                Entity.empty
+                                (Dict.get
+                                    focusedEntity.entityId
+                                    (getActiveEntities model)
+                                    |> Maybe.withDefault Entity.empty
+                                    |> Entity.getComponents
+                                    |> (Dict.insert componentName (f newVal))
+                                )
+                            )
 
                     updatedModel =
                         Maybe.map updateModel model.focusedEntity
@@ -213,6 +204,22 @@ update msg model =
                     component =
                         Component.getComponent name
 
+                    getUpdatedEntity { entityId, showingComponents } =
+                        getActiveEntities model
+                            |> Dict.get entityId
+                            |> \entity ->
+                                case entity of
+                                    Nothing ->
+                                        Nothing
+
+                                    Just (Entity components) ->
+                                        case component of
+                                            Nothing ->
+                                                Nothing
+
+                                            Just component ->
+                                                Just { entityId = entityId, entity = Entity <| Dict.insert name component components }
+
                     updateHelper focusedEntity =
                         case component of
                             Nothing ->
@@ -221,8 +228,7 @@ update msg model =
 
                             Just component ->
                                 { focusedEntity
-                                    | editor = Dict.insert name component focusedEntity.editor
-                                    , showingComponents = False
+                                    | showingComponents = False
                                 }
                 in
                     case name of
@@ -230,8 +236,19 @@ update msg model =
                             ( model, Cmd.none )
 
                         _ ->
-                            ( { model | focusedEntity = Maybe.map updateHelper model.focusedEntity }, Cmd.none )
+                            getUpdatedEntity
+                                model.focusedEntity
+                                |> Maybe.andThen
+                                    (\updatedEntity ->
+                                        case updatedEntity of
+                                            Nothing ->
+                                                ( model, Cmd.none )
 
+                                            Just { entityId, entity } ->
+                                                ( updateActiveEntityCollection entityId entity, Cmd.none )
+                                    )
+
+            -- ( { model | focusedEntity = Maybe.map updateHelper model.focusedEntity }, Cmd.none )
             ToggleComponentDropdown ->
                 let
                     updateFocusedEntity =
@@ -254,5 +271,18 @@ view model =
         exportData =
             Encode.toJson
                 { items = model.items, locations = model.locations, characters = model.characters }
+
+        entityWithEditor =
+            case model.focusedEntity of
+                Nothing ->
+                    Nothing
+
+                Just { entityId, showingComponents } ->
+                    case Dict.get entityId (getActiveEntities model) of
+                        Nothing ->
+                            Nothing
+
+                        Just entity ->
+                            Just { entityId = entityId, components = Entity.getComponents entity, showingComponents = showingComponents }
     in
-        Views.Layout.view model.mdl model.activeTab exportData (getActiveEntities model) model.focusedEntity
+        Views.Layout.view model.mdl model.activeTab exportData (getActiveEntities model) entityWithEditor
