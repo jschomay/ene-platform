@@ -195,21 +195,15 @@ update msg model =
 
             UpdateEditor componentName f newVal ->
                 let
-                    updateHelper focusedEntity =
-                        { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
-
                     updateModel focusedEntity =
-                        case focusedEntity of
-                            Just { entityId, editor } ->
+                        { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
+                            |> \{ entityId, editor, showingComponents } ->
                                 updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
-                                    |> \model -> { model | focusedEntity = focusedEntity }
-
-                            _ ->
-                                model
+                                    |> \model -> { model | focusedEntity = Just { entityId = entityId, editor = editor, showingComponents = showingComponents } }
 
                     updatedModel =
-                        Maybe.map updateHelper model.focusedEntity
-                            |> updateModel
+                        Maybe.map updateModel model.focusedEntity
+                            |> Maybe.withDefault model
                 in
                     -- TODO: refactor this bad boy, but for now just keeping forward
                     ( updatedModel, Cmd.none )

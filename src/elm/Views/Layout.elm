@@ -48,7 +48,6 @@ headerView mdl activeTab items focusedEntity =
         [ 0 ]
         mdl
         [ Tabs.activeTab activeTab
-        , Tabs.ripple
         , Tabs.onSelectTab ChangeActiveTab
         ]
         [ Tabs.label
