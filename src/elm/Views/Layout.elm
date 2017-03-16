@@ -11,6 +11,7 @@ import Material.Grid exposing (..)
 import Material.Tabs as Tabs
 import Material.Options as Options
 import Material.Icon as Icon
+import Material.Elevation as Elevation
 import Material
 
 
@@ -95,6 +96,12 @@ accordionView mdl entities focusedEntity =
                 , ( baseClass ++ "--active", entityId == focusedEntityId )
                 ]
 
+        wipShouldChangeThisOptionCs baseClass entityId =
+            if entityId == focusedEntityId then
+                Options.cs <| baseClass ++ "--active"
+            else
+                Options.cs <| baseClass
+
         editorView id =
             case focusedEntity of
                 Nothing ->
@@ -116,7 +123,11 @@ accordionView mdl entities focusedEntity =
                     , onClick <| clickEvent id
                     ]
                     [ text <| Entity.entityTitle id entity ]
-                , div [ classes "accordionPanel" id ]
+                , Options.div
+                    [ wipShouldChangeThisOptionCs "accordionPanel" id
+                    , Elevation.e6
+                      --classes "accordionPanel" id
+                    ]
                     (editorView id)
                 ]
 

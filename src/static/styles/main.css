@@ -1,22 +1,12 @@
-/* 
- * primary color: #498AAA
- * secondary color: #ABC9D4
- * light color: #FCFFF8
- * offset color: #CBB074
- *
- * */
-
 * { box-sizing: border-box; }
 
 body {
   width: 100%;
   height: 100%;
   margin: 0;
-  background: #498AAA;
 }
 .editor {
   margin: 50px;
-  color: #FCFFF8;
   font-family: helvetica;
   font-size: 18px;
 }
@@ -26,25 +16,10 @@ body {
   flex-direction: column;
 }
 
-
-
 .editor__header {
   display: flex;
   justify-content: space-around;
   padding-top: 20px;
-}
-
-.headerTab {
-  border: 1px solid #ABC9D4;
-  padding: 20px;
-  border-bottom: none;
-  flex: 1;
-  text-align: center;
-}
-
-
-.headerTab--active {
-  background-color: #CBB074;
 }
 
 .attributesEditor {
@@ -54,21 +29,13 @@ body {
   padding: 20px;
 }
 
-
 .attributes input, .attributes textarea {
   font-size:18px;
   padding:10px 10px 10px 5px;
   display:block;
   width:300px;
-  border:none;
-  border-bottom:1px solid #ABC9D4;
   background: transparent;
   color: inherit;
-}
-
-.attributes input:focus, .attributes textarea:focus {
-  outline:none; 
-  border-color: #FCFFF8;
 }
 
 .attributesEditor__item {
@@ -92,9 +59,8 @@ body {
   display: inline-block;
   font-size: inherit;
   padding: 10px;
-  border: 1px solid #ABC9D4;
-  background-color: #193441;
-  color: #FCFFF5;
+  /* background-color: #193441; */
+  color: black;
   text-decoration: none;
 }
 
@@ -107,10 +73,8 @@ body {
 }
 
 .accordionButton {
-  border: 1px solid;
   padding: 10px;
-  border: 1px solid #ABC9D4;
-  background-color: #193441;
+  /* background-color: #193441; */
   display: flex;
   justify-content: space-between;
 }
@@ -120,47 +84,18 @@ body {
 }
 
 .accordionButton--active {
-  background-color: #CBB074;
+  background-color: #3F51B5;
 }
 
 .accordionPanel input, .accordionPanel textarea {
   font-size:18px;
   padding:10px 10px 10px 5px;
-  border:none;
-  border-bottom:1px solid #ABC9D4;
-  background: transparent;
-  color: inherit;
-}
-
-.accordionPanel input:focus, .accordionPanel textarea:focus {
-  outline:none; 
-  border-color: #FCFFF8;
-}
-
-.attributesEditor__item {
-  display: flex;
-  margin-bottom: 50px;
-}
-
-.attributesEditor__item label {
-  flex: 0 1 150px;
-}
-
-.attributesEditor__item input {
-  flex: 1 1 0px;
-}
-
-.attributesEditor__item textarea {
-  flex: 1 1 0px;
 }
 
 .accordionPanel button, .export {
   display: inline-block;
   font-size: inherit;
   padding: 10px;
-  border: 1px solid #ABC9D4;
-  background-color: #193441;
-  color: #FCFFF5;
   text-decoration: none;
 }
 
@@ -174,8 +109,5 @@ body {
 
 .addComponent {
   padding: 10px;
-  border: 1px solid #ABC9D4;
-  background-color: #193441;
-  margin: 10px;
   width: 10%;
 }
