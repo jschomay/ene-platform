@@ -16,6 +16,9 @@ import Html.Events exposing (onInput, onClick, on, targetValue)
 import Types exposing (..)
 import Component
 import Json.Decode as Decode
+import Material.Menu as Menu
+import Material.Options as Options
+import Material
 
 
 empty : Entity
@@ -43,8 +46,8 @@ getComponents (Entity components) =
 -- TODO: test the update editor functions
 
 
-editorView : Components -> Bool -> List (Html Msg)
-editorView components showingComponents =
+editorView : Material.Model -> Components -> Bool -> List (Html Msg)
+editorView mdl components showingComponents =
     let
         availableComponents =
             Component.getAvailableComponents components
@@ -59,12 +62,22 @@ editorView components showingComponents =
         addComponentView =
             let
                 addComponentRenderer ( name, component ) =
-                    div [ componentOptionClasses, onClick <| AddComponent name ] [ text name ]
+                    Menu.item
+                        [ Menu.onSelect <| AddComponent name ]
+                        [ text name ]
             in
                 Dict.toList availableComponents
                     |> List.map addComponentRenderer
-                    |> (::) (div [ class "addComponent__dropdown", onClick ToggleComponentDropdown ] [ text "Add Component" ])
-                    |> div [ class "addComponent" ]
+                    |> \menuItems ->
+                        div [ class "addComponent" ]
+                            [ Menu.render Mdl
+                                [ 0 ]
+                                mdl
+                                [ Menu.icon "add"
+                                ]
+                                menuItems
+                            , Options.span [ Options.cs "addComponent__text" ] [ text "Components" ]
+                            ]
 
         componentDropdown =
             if Dict.size availableComponents > 0 then
@@ -74,7 +87,7 @@ editorView components showingComponents =
     in
         componentDropdown
             :: (Dict.values <|
-                    Dict.map Component.view components
+                    Dict.map (Component.view mdl) components
                )
 
 
