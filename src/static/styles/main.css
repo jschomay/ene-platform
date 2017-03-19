@@ -99,15 +99,19 @@ body {
   text-decoration: none;
 }
 
-.addComponent__item {
-  display: none;
-}
-
-.addComponent__item--visible {
-  display: block;
-}
-
 .addComponent {
   padding: 10px;
-  width: 10%;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  background: rgba(61, 61, 61, 0.04);
+}
+
+.addComponent__text {
+  padding-left: 10px;
+}
+
+.attributesEditor__header {
+  font-weight: bold;
+  text-align: center;
 }

@@ -12,6 +12,7 @@ import Material.Tabs as Tabs
 import Material.Options as Options
 import Material.Icon as Icon
 import Material.Elevation as Elevation
+import Material.Button as Button
 import Material
 
 
@@ -32,13 +33,17 @@ view mdl activeTab exportJson items focusedEntity =
         grid [ Options.css "justify-content" "space-around" ]
             [ cell [ Material.Grid.size All 6 ]
                 [ div [ class "editor__header" ] <| headerView mdl activeTabIdx items focusedEntity
-                , a
-                    [ type_ "button"
-                    , href <| "data:text/plain;charset=utf-8," ++ encodeUri exportJson
-                    , downloadAs "output.json"
-                    , class "export"
+                , div []
+                    [ Button.render Mdl
+                        [ 9, 0, 0, 1 ]
+                        mdl
+                        [ Button.colored
+                        , Button.raised
+                        , Button.link <| "data:text/plain;charset=utf-8," ++ encodeUri exportJson
+                        , Options.attribute <| downloadAs "output.json"
+                        ]
+                        [ text "Download" ]
                     ]
-                    [ text "Download" ]
                 ]
             ]
 

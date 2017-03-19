@@ -25,7 +25,8 @@ view mdl componentName component =
         case component of
             Style { selector } ->
                 div [ class "attributesEditor" ]
-                    [ div [ class "attributesEditor__item" ]
+                    [ p [ class "attributesEditor__header" ] [ text "Style Component" ]
+                    , div [ class "attributesEditor__item" ]
                         [ Textfield.render Mdl
                             [ 2 ]
                             mdl

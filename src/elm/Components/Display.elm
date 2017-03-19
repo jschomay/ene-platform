@@ -28,7 +28,8 @@ view mdl componentName component =
         case component of
             Display { name, description } ->
                 div [ class "attributesEditor" ]
-                    [ div [ class "attributesEditor__item" ]
+                    [ p [ class "attributesEditor__header" ] [ text "Display Component" ]
+                    , div [ class "attributesEditor__item" ]
                         [ Textfield.render Mdl
                             [ 0 ]
                             mdl

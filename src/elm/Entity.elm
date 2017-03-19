@@ -16,6 +16,8 @@ import Html.Events exposing (onInput, onClick, on, targetValue)
 import Types exposing (..)
 import Component
 import Json.Decode as Decode
+import Material.Menu as Menu
+import Material.Options as Options
 import Material
 
 
@@ -60,12 +62,22 @@ editorView mdl components showingComponents =
         addComponentView =
             let
                 addComponentRenderer ( name, component ) =
-                    div [ componentOptionClasses, onClick <| AddComponent name ] [ text name ]
+                    Menu.item
+                        [ Menu.onSelect <| AddComponent name ]
+                        [ text name ]
             in
                 Dict.toList availableComponents
                     |> List.map addComponentRenderer
-                    |> (::) (div [ class "addComponent__dropdown", onClick ToggleComponentDropdown ] [ text "Add Component" ])
-                    |> div [ class "addComponent" ]
+                    |> \menuItems ->
+                        div [ class "addComponent" ]
+                            [ Menu.render Mdl
+                                [ 0 ]
+                                mdl
+                                [ Menu.icon "add"
+                                ]
+                                menuItems
+                            , Options.span [ Options.cs "addComponent__text" ] [ text "Components" ]
+                            ]
 
         componentDropdown =
             if Dict.size availableComponents > 0 then
