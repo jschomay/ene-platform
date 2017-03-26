@@ -19,8 +19,8 @@ type TabName
 
 
 type Component
-    = Display { name : String, description : String }
-    | Style { selector : String }
+    = Display { name : String, description : String, entities : List ( EntityClasses, Bool ) }
+    | Style { selector : String, entities : List ( EntityClasses, Bool ) }
 
 
 type Msg

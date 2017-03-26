@@ -22,11 +22,50 @@ view mdl componentName component =
 -- TODO: figure out where the list of components should live
 
 
+getDefaultComponentsFor : EntityClasses -> Components
+getDefaultComponentsFor entity =
+    allAvailableComponents
+        |> Dict.filter
+            (\k v ->
+                case v of
+                    Display { entities } ->
+                        if List.member ( entity, True ) entities then
+                            True
+                        else
+                            False
+
+                    Style { entities } ->
+                        if List.member ( entity, True ) entities then
+                            True
+                        else
+                            False
+            )
+
+
 allAvailableComponents : Components
 allAvailableComponents =
     Dict.fromList
-        [ ( "display", Display { name = "", description = "" } )
-        , ( "style", Style { selector = "" } )
+        [ ( "display"
+          , Display
+                { name = ""
+                , description = ""
+                , entities =
+                    [ ( Item, True )
+                    , ( Location, True )
+                    , ( Character, False )
+                    ]
+                }
+          )
+        , ( "style"
+          , Style
+                { selector = ""
+                , entities =
+                    [ ( Item, False )
+                    , ( Location, False )
+                    , ( Character, True )
+                    ]
+                }
+          )
         ]
 
 
