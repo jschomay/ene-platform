@@ -73,14 +73,10 @@ body {
 }
 
 .accordionButton {
-  padding: 10px;
+  padding: 15px;
   /* background-color: #193441; */
   display: flex;
   justify-content: space-between;
-}
-
-.accordionButton:after {
-  content: "+"
 }
 
 .accordionButton--active {
@@ -104,6 +100,7 @@ body {
   display: flex;
   width: 100%;
   align-items: center;
+  justify-content: space-between;
   background: rgba(61, 61, 61, 0.04);
 }
 

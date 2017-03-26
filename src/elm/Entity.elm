@@ -17,7 +17,6 @@ import Types exposing (..)
 import Component
 import Json.Decode as Decode
 import Material.Menu as Menu
-import Material.Options as Options
 import Material
 
 
@@ -70,13 +69,13 @@ editorView mdl components showingComponents =
                     |> List.map addComponentRenderer
                     |> \menuItems ->
                         div [ class "addComponent" ]
-                            [ Menu.render Mdl
+                            [ span [] []
+                            , Menu.render Mdl
                                 [ 0 ]
                                 mdl
-                                [ Menu.icon "add"
+                                [ Menu.topRight
                                 ]
                                 menuItems
-                            , Options.span [ Options.cs "addComponent__text" ] [ text "Components" ]
                             ]
 
         componentDropdown =
@@ -85,10 +84,10 @@ editorView mdl components showingComponents =
             else
                 div [] []
     in
-        componentDropdown
-            :: (Dict.values <|
-                    Dict.map (Component.view mdl) components
-               )
+        (Dict.values <|
+            Dict.map (Component.view mdl) components
+        )
+            ++ [ componentDropdown ]
 
 
 newEntityId : TabName -> Int -> String

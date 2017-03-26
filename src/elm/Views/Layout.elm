@@ -7,12 +7,18 @@ import Html.Events exposing (..)
 import Entity as Entity
 import Dict exposing (Dict)
 import Http exposing (encodeUri)
-import Material.Grid exposing (..)
+import Material.Grid as Grid
+import Material.Layout as Layout
 import Material.Tabs as Tabs
 import Material.Options as Options
 import Material.Icon as Icon
 import Material.Elevation as Elevation
 import Material.Button as Button
+
+
+-- import Material.List as Lists
+-- import Material.Color as Color
+
 import Material
 
 
@@ -29,23 +35,34 @@ view mdl activeTab exportJson items focusedEntity =
 
                 CharactersTab ->
                     2
-    in
-        grid [ Options.css "justify-content" "space-around" ]
-            [ cell [ Material.Grid.size All 6 ]
-                [ div [ class "editor__header" ] <| headerView mdl activeTabIdx items focusedEntity
-                , div []
-                    [ Button.render Mdl
-                        [ 9, 0, 0, 1 ]
-                        mdl
-                        [ Button.colored
-                        , Button.raised
-                        , Button.link <| "data:text/plain;charset=utf-8," ++ encodeUri exportJson
-                        , Options.attribute <| downloadAs "output.json"
-                        ]
-                        [ text "Download" ]
+
+        drawer =
+            [ Layout.title [] [ text "ENE Platform" ]
+            , Layout.navigation
+                []
+                [ Layout.link
+                    [ Layout.href <| "data:text/plain;charset=utf-8," ++ encodeUri exportJson
+                    , Options.attribute <| downloadAs "export.json"
                     ]
+                    [ text "Export" ]
                 ]
             ]
+
+        grid =
+            Grid.grid [ Options.css "justify-content" "space-around" ]
+                [ Grid.cell [ Grid.size Grid.All 6 ]
+                    [ div [ class "editor__header" ] <| headerView mdl activeTabIdx items focusedEntity
+                    ]
+                ]
+    in
+        Layout.render Mdl
+            mdl
+            [ Layout.fixedHeader ]
+            { header = [ text "" ]
+            , drawer = drawer
+            , tabs = ( [], [] )
+            , main = [ grid ]
+            }
 
 
 headerView : Material.Model -> Int -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> List (Html Msg)
@@ -139,13 +156,19 @@ accordionView mdl entities focusedEntity =
         accordionItems =
             entities
                 |> Dict.toList
-                |> List.sortBy (uncurry Entity.entityTitle)
                 |> List.map accordionItem
 
-        -- Dict.values <| Dict.map accordionItem <| entities
         newItem =
             [ div [ class "entity" ]
-                [ div [ class "accordionButton", onClick NewEntity ] [ text "Add new" ] ]
+                [ Button.render Mdl
+                    [ 0 ]
+                    mdl
+                    [ Button.colored
+                    , Options.onClick NewEntity
+                    ]
+                    [ text "Add New" ]
+                ]
+              -- [ div [ class "accordionButton", onClick NewEntity ] [ text "Add new" ] ]
             ]
     in
         accordionItems ++ newItem
