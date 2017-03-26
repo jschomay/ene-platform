@@ -47,15 +47,48 @@ init : ( Model, Cmd Msg )
 init =
     let
         items =
-            (Dict.singleton "items1" <| Entity.init (Dict.singleton "display" (Display { name = "item1", description = "my item" })))
+            (Dict.singleton "items1" <|
+                Entity.init
+                    (Dict.singleton "display"
+                        (Display
+                            { name = "item1"
+                            , description = "my item"
+                            , entities =
+                                [ ( Item, True )
+                                , ( Location, True )
+                                , ( Character, True )
+                                ]
+                            }
+                        )
+                    )
+            )
 
         locations =
             (Dict.fromList
                 [ ( "locations1"
                   , Entity.init
                         (Dict.fromList
-                            [ ( "display", Display { name = "location1", description = "my location" } )
-                            , ( "style", Style { selector = "mySelector" } )
+                            [ ( "display"
+                              , Display
+                                    { name = "location1"
+                                    , description = "my location"
+                                    , entities =
+                                        [ ( Item, True )
+                                        , ( Location, True )
+                                        , ( Character, True )
+                                        ]
+                                    }
+                              )
+                            , ( "style"
+                              , Style
+                                    { selector = "mySelector"
+                                    , entities =
+                                        [ ( Item, True )
+                                        , ( Location, True )
+                                        , ( Character, True )
+                                        ]
+                                    }
+                              )
                             ]
                         )
                   )
