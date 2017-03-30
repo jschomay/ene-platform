@@ -213,22 +213,25 @@ update msg model =
                                     , showingComponents = False
                                 }
                 in
-                    case name of
-                        "" ->
-                            ( model, Cmd.none )
-
-                        _ ->
-                            ( { model | focusedEntity = Maybe.map updateHelper model.focusedEntity }, Cmd.none )
+                    if name == "" then
+                        ( model, Cmd.none )
+                    else
+                        ( { model
+                            | focusedEntity = Maybe.map updateHelper model.focusedEntity
+                          }
+                        , Cmd.none
+                        )
 
             ToggleComponentDropdown ->
                 let
                     updateFocusedEntity =
-                        case model.focusedEntity of
-                            Nothing ->
-                                Nothing
-
-                            Just focusedEntity ->
-                                Just { focusedEntity | showingComponents = not focusedEntity.showingComponents }
+                        Maybe.map
+                            (\focusedEntity ->
+                                { focusedEntity
+                                    | showingComponents = not focusedEntity.showingComponents
+                                }
+                            )
+                            model.focusedEntity
                 in
                     ( { model | focusedEntity = updateFocusedEntity }, Cmd.none )
 
@@ -243,4 +246,10 @@ view model =
             Encode.toJson
                 { items = model.items, locations = model.locations, characters = model.characters }
     in
-        Views.Layout.view model.mdl model.activeTab exportData (getActiveEntities model) model.focusedEntity
+        Views.Layout.view
+            { mdl = model.mdl
+            , activeTab = model.activeTab
+            , exportJson = exportData
+            , items = (getActiveEntities model)
+            , focusedEntity = model.focusedEntity
+            }

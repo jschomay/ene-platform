@@ -7,7 +7,11 @@ import Types exposing (..)
 
 toJson : { a | items : Dict String Entity, locations : Dict String Entity, characters : Dict String Entity } -> String
 toJson { items, locations, characters } =
-    Encode.object [ ( "items", encodeDict items ), ( "locations", encodeDict locations ), ( "characters", encodeDict characters ) ]
+    Encode.object
+        [ ( "items", encodeDict items )
+        , ( "locations", encodeDict locations )
+        , ( "characters", encodeDict characters )
+        ]
         |> Encode.encode 2
 
 

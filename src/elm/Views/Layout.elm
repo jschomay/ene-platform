@@ -22,8 +22,20 @@ import Material.Button as Button
 import Material
 
 
-view : Material.Model -> TabName -> String -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> Html Msg
-view mdl activeTab exportJson items focusedEntity =
+view :
+    { mdl : Material.Model
+    , activeTab : TabName
+    , exportJson : String
+    , items : Dict String Entity
+    , focusedEntity :
+        Maybe
+            { entityId : String
+            , editor : Components
+            , showingComponents : Bool
+            }
+    }
+    -> Html Msg
+view { mdl, activeTab, exportJson, items, focusedEntity } =
     let
         activeTabIdx =
             case activeTab of
