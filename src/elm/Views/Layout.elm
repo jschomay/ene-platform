@@ -124,13 +124,13 @@ accordionView mdl entities focusedEntity =
                 focusedEntity
                 |> .entityId
 
-        classes baseClass entityId =
+        buttonClasses baseClass entityId =
             classList
                 [ ( baseClass, True )
                 , ( baseClass ++ "--active", entityId == focusedEntityId )
                 ]
 
-        wipShouldChangeThisOptionCs baseClass entityId =
+        panelClass baseClass entityId =
             if entityId == focusedEntityId then
                 Options.cs <| baseClass ++ "--active"
             else
@@ -153,14 +153,13 @@ accordionView mdl entities focusedEntity =
         accordionItem ( id, entity ) =
             div [ class "entity" ]
                 [ div
-                    [ classes "accordionButton" id
+                    [ buttonClasses "accordionButton" id
                     , onClick <| clickEvent id
                     ]
                     [ text <| Entity.entityTitle id entity ]
                 , Options.div
-                    [ wipShouldChangeThisOptionCs "accordionPanel" id
+                    [ panelClass "accordionPanel" id
                     , Elevation.e6
-                      --classes "accordionPanel" id
                     ]
                     (editorView id)
                 ]
