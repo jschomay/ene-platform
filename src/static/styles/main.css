@@ -81,6 +81,7 @@ body {
 
 .accordionButton--active {
   background-color: #3F51B5;
+  color: white;
 }
 
 .accordionPanel input, .accordionPanel textarea {
