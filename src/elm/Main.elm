@@ -5,6 +5,7 @@ import Types exposing (..)
 import Views.Layout
 import Dict exposing (Dict)
 import Entity exposing (..)
+import Tabs
 import Encode
 import Component
 import Material
@@ -21,10 +22,6 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
-
-
-
---TODO: get rid of the editor and onInput sync the entity and then store it
 
 
 type alias Model =
@@ -47,26 +44,59 @@ init : ( Model, Cmd Msg )
 init =
     let
         items =
-            (Dict.singleton "items1" <| Entity.init (Dict.singleton "display" (Display { name = "item1", description = "my item" })))
+            (Dict.singleton "items1" <|
+                Entity.init Location
+                    (Dict.singleton "display"
+                        (Display
+                            { name = "item1"
+                            , description = "my item"
+                            , entities =
+                                [ ( Item, True )
+                                , ( Location, True )
+                                , ( Character, True )
+                                ]
+                            }
+                        )
+                    )
+            )
 
         locations =
             (Dict.fromList
                 [ ( "locations1"
-                  , Entity.init
+                  , Entity.init Location
                         (Dict.fromList
-                            [ ( "display", Display { name = "location1", description = "my location" } )
-                            , ( "style", Style { selector = "mySelector" } )
+                            [ ( "display"
+                              , Display
+                                    { name = "location1"
+                                    , description = "my location"
+                                    , entities =
+                                        [ ( Item, True )
+                                        , ( Location, True )
+                                        , ( Character, True )
+                                        ]
+                                    }
+                              )
+                            , ( "style"
+                              , Style
+                                    { selector = "mySelector"
+                                    , entities =
+                                        [ ( Item, True )
+                                        , ( Location, True )
+                                        , ( Character, True )
+                                        ]
+                                    }
+                              )
                             ]
                         )
                   )
                 , ( "locations2"
-                  , Entity.empty
+                  , Entity.empty Location
                   )
                 ]
             )
 
         characters =
-            (Dict.singleton "characters1" Entity.empty)
+            (Dict.singleton "characters1" (Entity.empty Character))
     in
         ( { items = items
           , locations = locations
@@ -111,12 +141,10 @@ update msg model =
                         , editor =
                             (Entity.getComponents
                                 (Dict.get focusedEntity currentEntities
-                                    |> Maybe.withDefault Entity.empty
+                                    |> Maybe.withDefault (Entity.empty <| Tabs.tabToEntityClass model.activeTab)
                                 )
                             )
-                        , showingComponents =
-                            False
-                            -- TODO , maybe just crash?
+                        , showingComponents = False
                         }
             }
 
@@ -138,15 +166,7 @@ update msg model =
             ChangeActiveTab newTabIndex ->
                 let
                     newActiveTab =
-                        case newTabIndex of
-                            0 ->
-                                ItemsTab
-
-                            1 ->
-                                LocationsTab
-
-                            _ ->
-                                CharactersTab
+                        Tabs.indexToTab newTabIndex
                 in
                     ( { model
                         | activeTab = newActiveTab
@@ -170,7 +190,7 @@ update msg model =
                         Entity.newEntityId model.activeTab newId
 
                     newModel =
-                        updateActiveEntityCollection newEntityId Entity.empty
+                        updateActiveEntityCollection newEntityId (Entity.empty <| Tabs.tabToEntityClass model.activeTab)
                 in
                     ( changeFocusedEntity newEntityId newModel
                         |> (\model ->
@@ -186,7 +206,7 @@ update msg model =
                     updateModel focusedEntity =
                         { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
                             |> \{ entityId, editor, showingComponents } ->
-                                updateActiveEntityCollection entityId (Entity.update Entity.empty editor)
+                                updateActiveEntityCollection entityId (Entity.update (Entity.empty <| Tabs.tabToEntityClass model.activeTab) editor)
                                     |> \model -> { model | focusedEntity = Just { entityId = entityId, editor = editor, showingComponents = showingComponents } }
 
                     updatedModel =

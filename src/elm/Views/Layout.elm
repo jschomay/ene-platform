@@ -4,7 +4,8 @@ import Types exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Entity as Entity
+import Entity
+import Tabs
 import Dict exposing (Dict)
 import Http exposing (encodeUri)
 import Material.Grid as Grid
@@ -38,15 +39,7 @@ view :
 view { mdl, activeTab, exportJson, items, focusedEntity } =
     let
         activeTabIdx =
-            case activeTab of
-                ItemsTab ->
-                    0
-
-                LocationsTab ->
-                    1
-
-                CharactersTab ->
-                    2
+            Tabs.tabToIndex activeTab
 
         drawer =
             [ Layout.title [] [ text "ENE Platform" ]
@@ -179,7 +172,6 @@ accordionView mdl entities focusedEntity =
                     ]
                     [ text "Add New" ]
                 ]
-              -- [ div [ class "accordionButton", onClick NewEntity ] [ text "Add new" ] ]
             ]
     in
         accordionItems ++ newItem

@@ -12,22 +12,20 @@ module Entity
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput, onClick, on, targetValue)
 import Types exposing (..)
 import Component
-import Json.Decode as Decode
 import Material.Menu as Menu
 import Material
 
 
-empty : Entity
-empty =
-    Entity Dict.empty
+empty : EntityClasses -> Entity
+empty entity =
+    Entity <| Component.getDefaultComponentsFor entity
 
 
-init : Components -> Entity
-init components =
-    update empty components
+init : EntityClasses -> Components -> Entity
+init entity components =
+    update (empty entity) components
 
 
 update : Entity -> Components -> Entity
@@ -54,10 +52,6 @@ editorView mdl components showingComponents =
         componentOptionClasses =
             classList [ ( "addComponent__item", True ), ( "addComponent__item--visible", showingComponents ) ]
 
-        onSelect =
-            -- becuase of https://github.com/elm-lang/html/issues/71
-            on "change" (Decode.map AddComponent Html.Events.targetValue)
-
         addComponentView =
             let
                 addComponentRenderer ( name, component ) =
@@ -70,12 +64,7 @@ editorView mdl components showingComponents =
                     |> \menuItems ->
                         div [ class "addComponent" ]
                             [ span [] []
-                            , Menu.render Mdl
-                                [ 0 ]
-                                mdl
-                                [ Menu.topRight
-                                ]
-                                menuItems
+                            , Menu.render Mdl [ 0 ] mdl [ Menu.topRight ] menuItems
                             ]
 
         componentDropdown =
@@ -103,9 +92,3 @@ entityTitle defaultTitle entity =
     getComponents entity
         |> Component.getTitle
         |> Maybe.withDefault defaultTitle
-
-
-
--- some more data we need there: 1. list of entities the component belongs to
---                               2. Whether its default or can be deleted
--- then allAvaialbleComponents can filter out by entity that it belongs to?
