@@ -1,6 +1,6 @@
 module Views.Layout exposing (..)
 
-import Types exposing (..)
+import PlatformTypes exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -159,7 +159,7 @@ accordionView mdl entities focusedEntity =
                     [ buttonClasses "accordionButton" id
                     , onClick <| clickEvent id
                     ]
-                    [ text <| Entity.entityTitle id entity ]
+                    [ text <| Entity.entityTitle id entity ++ " (id: " ++ id ++ ")" ]
                 , Options.div
                     [ panelClass "accordionPanel" id
                     , Elevation.e6

@@ -5,7 +5,7 @@ module Tabs
         , tabToEntityClass
         )
 
-import Types exposing (..)
+import PlatformTypes exposing (..)
 
 
 type alias TabMapping =

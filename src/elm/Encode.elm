@@ -2,7 +2,7 @@ module Encode exposing (toJson)
 
 import Json.Encode as Encode
 import Dict exposing (Dict)
-import Types exposing (..)
+import PlatformTypes exposing (..)
 import Component
 
 

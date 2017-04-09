@@ -12,7 +12,7 @@ module Entity
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Types exposing (..)
+import PlatformTypes exposing (..)
 import Component
 import Material.Menu as Menu
 import Material
@@ -91,4 +91,4 @@ entityTitle : String -> Entity -> String
 entityTitle defaultTitle entity =
     getComponents entity
         |> Component.getTitle
-        |> Maybe.withDefault defaultTitle
+        |> Maybe.withDefault "Unnamed"

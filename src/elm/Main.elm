@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Types exposing (..)
+import PlatformTypes exposing (..)
 import Views.Layout
 import Dict exposing (Dict)
 import Entity exposing (..)

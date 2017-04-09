@@ -1,6 +1,6 @@
 module Components.Display exposing (..)
 
-import Types exposing (..)
+import PlatformTypes exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Material.Textfield as Textfield

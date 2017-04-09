@@ -1,6 +1,6 @@
 module Component exposing (..)
 
-import Types exposing (..)
+import PlatformTypes exposing (..)
 import Html exposing (Html)
 import Components.Display
 import Components.Style
@@ -88,7 +88,7 @@ allAvailableComponents =
           )
         , ( "rule"
           , RuleBuilder
-                { athing = ""
+                { interactionMatcher = With "item4"
                 , entities = [ ( Rule, True ) ]
                 }
           )
