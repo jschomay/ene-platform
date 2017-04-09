@@ -17,6 +17,7 @@ tabMapping =
     [ ( 0, ItemsTab )
     , ( 1, LocationsTab )
     , ( 2, CharactersTab )
+    , ( 3, RulesTab )
     ]
 
 
@@ -59,3 +60,6 @@ tabToEntityClass tabName =
 
         CharactersTab ->
             Character
+
+        RulesTab ->
+            Rule

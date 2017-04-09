@@ -4,8 +4,10 @@ import Types exposing (..)
 import Html exposing (Html)
 import Components.Display
 import Components.Style
+import Components.RuleBuilder
 import Dict
 import Material
+import Json.Encode as Encode
 
 
 view : Material.Model -> String -> Component -> Html Msg
@@ -16,6 +18,22 @@ view mdl componentName component =
 
         Style attributes ->
             Components.Style.view mdl componentName component
+
+        RuleBuilder attributes ->
+            Components.RuleBuilder.view mdl componentName component
+
+
+encode : Component -> Encode.Value
+encode component =
+    case component of
+        Display params ->
+            Encode.object [ ( "name", Encode.string params.name ), ( "description", Encode.string params.description ) ]
+
+        Style params ->
+            Encode.object [ ( "selector", Encode.string params.selector ) ]
+
+        RuleBuilder params ->
+            Encode.object [ ( "todo", Encode.string "" ) ]
 
 
 
@@ -29,17 +47,19 @@ getDefaultComponentsFor entity =
             (\k v ->
                 case v of
                     Display { entities } ->
-                        if List.member ( entity, True ) entities then
-                            True
-                        else
-                            False
+                        List.member ( entity, True ) entities
 
                     Style { entities } ->
-                        if List.member ( entity, True ) entities then
-                            True
-                        else
-                            False
+                        List.member ( entity, True ) entities
+
+                    RuleBuilder { entities } ->
+                        List.member ( entity, True ) entities
             )
+
+
+
+-- pull out entities into some custom dictionary
+-- that i can call later.
 
 
 allAvailableComponents : Components
@@ -64,6 +84,12 @@ allAvailableComponents =
                     , ( Location, False )
                     , ( Character, True )
                     ]
+                }
+          )
+        , ( "rule"
+          , RuleBuilder
+                { athing = ""
+                , entities = [ ( Rule, True ) ]
                 }
           )
         ]

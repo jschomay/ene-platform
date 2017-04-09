@@ -70,6 +70,10 @@ view { mdl, activeTab, exportJson, items, focusedEntity } =
             }
 
 
+
+-- TODO: forgot to move this into the Tab module and refactor
+
+
 headerView : Material.Model -> Int -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> List (Html Msg)
 headerView mdl activeTab items focusedEntity =
     [ Tabs.render Mdl
@@ -95,6 +99,12 @@ headerView mdl activeTab items focusedEntity =
             [ Icon.i "person"
             , Options.span [ Options.css "width" "4px" ] []
             , text "Characters"
+            ]
+        , Tabs.label
+            [ Options.center ]
+            [ Icon.i "person"
+            , Options.span [ Options.css "width" "4px" ] []
+            , text "Rules"
             ]
         ]
         [ Options.div

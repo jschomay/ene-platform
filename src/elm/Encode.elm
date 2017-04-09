@@ -3,6 +3,7 @@ module Encode exposing (toJson)
 import Json.Encode as Encode
 import Dict exposing (Dict)
 import Types exposing (..)
+import Component
 
 
 toJson : { a | items : Dict String Entity, locations : Dict String Entity, characters : Dict String Entity } -> String
@@ -31,9 +32,4 @@ encodeEntity (Entity components) =
 
 encodeComponent : Component -> Encode.Value
 encodeComponent component =
-    case component of
-        Display params ->
-            Encode.object [ ( "name", Encode.string params.name ), ( "description", Encode.string params.description ) ]
-
-        Style params ->
-            Encode.object [ ( "selector", Encode.string params.selector ) ]
+    Component.encode component

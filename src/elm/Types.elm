@@ -8,6 +8,7 @@ type TabName
     = ItemsTab
     | LocationsTab
     | CharactersTab
+    | RulesTab
 
 
 
@@ -21,6 +22,7 @@ type TabName
 type Component
     = Display { name : String, description : String, entities : List ( EntityClasses, Bool ) }
     | Style { selector : String, entities : List ( EntityClasses, Bool ) }
+    | RuleBuilder { athing : String, entities : List ( EntityClasses, Bool ) }
 
 
 type Msg
@@ -47,3 +49,4 @@ type EntityClasses
     = Item
     | Location
     | Character
+    | Rule

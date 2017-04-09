@@ -28,6 +28,7 @@ type alias Model =
     { items : Dict String Entity
     , locations : Dict String Entity
     , characters : Dict String Entity
+    , rules : Dict String Entity
     , activeTab : TabName
     , lastId : Int
     , focusedEntity :
@@ -97,10 +98,14 @@ init =
 
         characters =
             (Dict.singleton "characters1" (Entity.empty Character))
+
+        rules =
+            Dict.singleton "rule1" <| Entity.empty Rule
     in
         ( { items = items
           , locations = locations
           , characters = characters
+          , rules = rules
           , activeTab = ItemsTab
           , lastId = 3
           , focusedEntity = Nothing
@@ -125,6 +130,9 @@ getActiveEntities model =
 
         CharactersTab ->
             model.characters
+
+        RulesTab ->
+            model.rules
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -158,6 +166,9 @@ update msg model =
 
                 CharactersTab ->
                     { model | characters = Dict.insert entityId newEntity model.characters }
+
+                RulesTab ->
+                    { model | rules = Dict.insert entityId newEntity model.rules }
     in
         case msg of
             NoOp ->
