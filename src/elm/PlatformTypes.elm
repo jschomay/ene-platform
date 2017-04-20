@@ -20,9 +20,9 @@ type TabName
 
 
 type Component
-    = Display { name : String, description : String, entities : List ( EntityClasses, Bool ) }
-    | Style { selector : String, entities : List ( EntityClasses, Bool ) }
-    | RuleBuilder { interactionMatcher : InteractionMatcher, entities : List ( EntityClasses, Bool ) }
+    = Display { name : String, description : String }
+    | Style { selector : String }
+    | RuleBuilder { interactionMatcher : InteractionMatcher }
 
 
 type Msg

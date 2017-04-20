@@ -43,11 +43,11 @@ getComponents (Entity components) =
 -- TODO: test the update editor functions
 
 
-editorView : Material.Model -> Components -> Bool -> List (Html Msg)
-editorView mdl components showingComponents =
+editorView : Material.Model -> EntityClasses -> Components -> Bool -> List (Html Msg)
+editorView mdl entity components showingComponents =
     let
         availableComponents =
-            Component.getAvailableComponents components
+            Component.getAvailableComponents entity components
 
         componentOptionClasses =
             classList [ ( "addComponent__item", True ), ( "addComponent__item--visible", showingComponents ) ]

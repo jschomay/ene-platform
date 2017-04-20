@@ -34,6 +34,7 @@ type alias Model =
     , focusedEntity :
         Maybe
             { entityId : String
+            , entityClass : EntityClasses
             , editor : Components
             , showingComponents : Bool
             }
@@ -51,11 +52,6 @@ init =
                         (Display
                             { name = "item1"
                             , description = "my item"
-                            , entities =
-                                [ ( Item, True )
-                                , ( Location, True )
-                                , ( Character, True )
-                                ]
                             }
                         )
                     )
@@ -70,21 +66,11 @@ init =
                               , Display
                                     { name = "location1"
                                     , description = "my location"
-                                    , entities =
-                                        [ ( Item, True )
-                                        , ( Location, True )
-                                        , ( Character, True )
-                                        ]
                                     }
                               )
                             , ( "style"
                               , Style
                                     { selector = "mySelector"
-                                    , entities =
-                                        [ ( Item, True )
-                                        , ( Location, True )
-                                        , ( Character, True )
-                                        ]
                                     }
                               )
                             ]
@@ -152,6 +138,7 @@ update msg model =
                                     |> Maybe.withDefault (Entity.empty <| Tabs.tabToEntityClass model.activeTab)
                                 )
                             )
+                        , entityClass = Tabs.tabToEntityClass model.activeTab
                         , showingComponents = False
                         }
             }
@@ -216,9 +203,9 @@ update msg model =
                 let
                     updateModel focusedEntity =
                         { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
-                            |> \{ entityId, editor, showingComponents } ->
+                            |> \{ entityId, entityClass, editor, showingComponents } ->
                                 updateActiveEntityCollection entityId (Entity.update (Entity.empty <| Tabs.tabToEntityClass model.activeTab) editor)
-                                    |> \model -> { model | focusedEntity = Just { entityId = entityId, editor = editor, showingComponents = showingComponents } }
+                                    |> \model -> { model | focusedEntity = Just { entityId = entityId, entityClass = entityClass, editor = editor, showingComponents = showingComponents } }
 
                     updatedModel =
                         Maybe.map updateModel model.focusedEntity
@@ -230,7 +217,9 @@ update msg model =
             AddComponent name ->
                 let
                     component =
-                        Component.getComponent name
+                        model.focusedEntity
+                            |> Maybe.map .entityClass
+                            |> Maybe.andThen (Component.getComponent name)
 
                     updateHelper focusedEntity =
                         case component of

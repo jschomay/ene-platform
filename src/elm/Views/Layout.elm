@@ -32,6 +32,7 @@ view :
         Maybe
             { entityId : String
             , editor : Components
+            , entityClass : EntityClasses
             , showingComponents : Bool
             }
     }
@@ -74,7 +75,17 @@ view { mdl, activeTab, exportJson, items, focusedEntity } =
 -- TODO: forgot to move this into the Tab module and refactor
 
 
-headerView : Material.Model -> Int -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> List (Html Msg)
+headerView :
+    Material.Model
+    -> Int
+    -> Dict String Entity
+    -> Maybe
+        { entityId : String
+        , entityClass : EntityClasses
+        , editor : Components
+        , showingComponents : Bool
+        }
+    -> List (Html Msg)
 headerView mdl activeTab items focusedEntity =
     [ Tabs.render Mdl
         [ 0 ]
@@ -118,12 +129,21 @@ headerView mdl activeTab items focusedEntity =
     ]
 
 
-accordionView : Material.Model -> Dict String Entity -> Maybe { entityId : String, editor : Components, showingComponents : Bool } -> List (Html Msg)
+accordionView :
+    Material.Model
+    -> Dict String Entity
+    -> Maybe
+        { entityId : String
+        , editor : Components
+        , entityClass : EntityClasses
+        , showingComponents : Bool
+        }
+    -> List (Html Msg)
 accordionView mdl entities focusedEntity =
     let
         focusedEntityId =
             Maybe.withDefault
-                { entityId = "", editor = Dict.empty, showingComponents = False }
+                { entityId = "", entityClass = Item, editor = Dict.empty, showingComponents = False }
                 focusedEntity
                 |> .entityId
 
@@ -144,8 +164,8 @@ accordionView mdl entities focusedEntity =
                 Nothing ->
                     [ div [] [ text "nothing here" ] ]
 
-                Just { entityId, editor, showingComponents } ->
-                    Entity.editorView mdl editor showingComponents
+                Just { entityId, editor, entityClass, showingComponents } ->
+                    Entity.editorView mdl entityClass editor showingComponents
 
         clickEvent id =
             if id == focusedEntityId then

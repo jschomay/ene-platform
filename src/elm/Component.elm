@@ -10,6 +10,32 @@ import Material
 import Json.Encode as Encode
 
 
+componentEntities :
+    List
+        { component : String
+        , entities : List ( EntityClasses, Bool )
+        }
+componentEntities =
+    [ { component = "display"
+      , entities =
+            [ ( Item, True )
+            , ( Location, True )
+            , ( Character, True )
+            ]
+      }
+    , { component = "style"
+      , entities =
+            [ ( Item, False )
+            , ( Location, False )
+            , ( Character, False )
+            ]
+      }
+    , { component = "rule"
+      , entities = [ ( Rule, False ) ]
+      }
+    ]
+
+
 view : Material.Model -> String -> Component -> Html Msg
 view mdl componentName component =
     case component of
@@ -42,19 +68,21 @@ encode component =
 
 getDefaultComponentsFor : EntityClasses -> Components
 getDefaultComponentsFor entity =
-    allAvailableComponents
-        |> Dict.filter
-            (\k v ->
-                case v of
-                    Display { entities } ->
-                        List.member ( entity, True ) entities
-
-                    Style { entities } ->
-                        List.member ( entity, True ) entities
-
-                    RuleBuilder { entities } ->
-                        List.member ( entity, True ) entities
-            )
+    let
+        isDefaultComponent componentName =
+            List.any
+                (\{ component, entities } ->
+                    component
+                        == componentName
+                        && List.member
+                            ( entity, True )
+                            entities
+                )
+                componentEntities
+    in
+        (allAvailableComponents entity)
+            |> Dict.filter
+                (\k v -> isDefaultComponent k)
 
 
 
@@ -62,47 +90,71 @@ getDefaultComponentsFor entity =
 -- that i can call later.
 
 
-allAvailableComponents : Components
-allAvailableComponents =
-    Dict.fromList
-        [ ( "display"
-          , Display
-                { name = ""
-                , description = ""
-                , entities =
-                    [ ( Item, True )
-                    , ( Location, True )
-                    , ( Character, False )
-                    ]
-                }
-          )
-        , ( "style"
-          , Style
-                { selector = ""
-                , entities =
-                    [ ( Item, False )
-                    , ( Location, False )
-                    , ( Character, True )
-                    ]
-                }
-          )
-        , ( "rule"
-          , RuleBuilder
-                { interactionMatcher = With "item4"
-                , entities = [ ( Rule, True ) ]
-                }
-          )
-        ]
+allAvailableComponents : EntityClasses -> Components
+allAvailableComponents entity =
+    let
+        getComponent component =
+            .component component
+
+        isComponent componentToMatch =
+            let
+                compToMatch =
+                    getComponent componentToMatch
+            in
+                List.any
+                    (\{ component, entities } -> component == compToMatch && (List.member ( entity, True ) entities || List.member ( entity, False ) entities))
+                    componentEntities
+
+        toInit { component } =
+            let
+                toComponent =
+                    case component of
+                        "style" ->
+                            Style { selector = "" }
+
+                        "rule" ->
+                            RuleBuilder { interactionMatcher = With "item4" }
+
+                        _ ->
+                            Display { name = "", description = "" }
+            in
+                ( component, toComponent )
+    in
+        componentEntities
+            |> List.filter isComponent
+            |> List.map toInit
+            |> Dict.fromList
 
 
-getAvailableComponents : Components -> Components
-getAvailableComponents components =
-    Dict.diff allAvailableComponents components
+
+-- Dict.fromList
+-- [ ( "display"
+--   , Display
+--         { name = ""
+--         , description = ""
+--         }
+--   )
+-- , ( "style"
+--   , Style
+--         { selector = ""
+--         }
+--   )
+-- , ( "rule"
+--   , RuleBuilder
+--         { interactionMatcher = With "item4"
+--         }
+--   )
+-- ]
 
 
-getComponent : String -> Maybe Component
-getComponent name =
-    allAvailableComponents
+getAvailableComponents : EntityClasses -> Components -> Components
+getAvailableComponents entity components =
+    Dict.diff (allAvailableComponents entity) components
+
+
+getComponent : String -> EntityClasses -> Maybe Component
+getComponent name entity =
+    (allAvailableComponents entity)
         |> Dict.get name
 
 
