@@ -10,16 +10,10 @@ import Dict exposing (Dict)
 import Http exposing (encodeUri)
 import Material.Grid as Grid
 import Material.Layout as Layout
-import Material.Tabs as Tabs
+import Material.Tabs as MdlTabs
 import Material.Options as Options
-import Material.Icon as Icon
 import Material.Elevation as Elevation
 import Material.Button as Button
-
-
--- import Material.List as Lists
--- import Material.Color as Color
-
 import Material
 
 
@@ -87,46 +81,26 @@ headerView :
         }
     -> List (Html Msg)
 headerView mdl activeTab items focusedEntity =
-    [ Tabs.render Mdl
-        [ 0 ]
-        mdl
-        [ Tabs.activeTab activeTab
-        , Tabs.onSelectTab ChangeActiveTab
-        ]
-        [ Tabs.label
-            [ Options.center ]
-            [ Icon.i "card_travel"
-            , Options.span [ Options.css "width" "4px" ] []
-            , text "Items"
+    let
+        tabContent =
+            Tabs.render mdl activeTab items focusedEntity
+    in
+        [ MdlTabs.render Mdl
+            [ 0 ]
+            mdl
+            [ MdlTabs.activeTab activeTab
+            , MdlTabs.onSelectTab ChangeActiveTab
             ]
-        , Tabs.label
-            [ Options.center ]
-            [ Icon.i "my_location"
-            , Options.span [ Options.css "width" "4px" ] []
-            , text "Locations"
-            ]
-        , Tabs.label
-            [ Options.center ]
-            [ Icon.i "person"
-            , Options.span [ Options.css "width" "4px" ] []
-            , text "Characters"
-            ]
-        , Tabs.label
-            [ Options.center ]
-            [ Icon.i "person"
-            , Options.span [ Options.css "width" "4px" ] []
-            , text "Rules"
+            tabContent
+            [ Options.div
+                [ Options.css "margin" "24px auto"
+                , Options.css "flex-direction" "column"
+                , Options.css "flex" "1 1 0"
+                ]
+              <|
+                accordionView mdl items focusedEntity
             ]
         ]
-        [ Options.div
-            [ Options.css "margin" "24px auto"
-            , Options.css "flex-direction" "column"
-            , Options.css "flex" "1 1 0"
-            ]
-          <|
-            accordionView mdl items focusedEntity
-        ]
-    ]
 
 
 accordionView :
