@@ -31,7 +31,12 @@ componentEntities =
             ]
       }
     , { component = "rule"
-      , entities = [ ( Rule, False ) ]
+      , entities =
+            [ ( Rule, False )
+            , ( Item, False )
+            , ( Location, False )
+            , ( Character, False )
+            ]
       }
     ]
 
@@ -113,7 +118,7 @@ allAvailableComponents entity =
                             Style { selector = "" }
 
                         "rule" ->
-                            RuleBuilder { interactionMatcher = With "item4" }
+                            RuleBuilder { interactionMatcher = With "" }
 
                         _ ->
                             Display { name = "", description = "" }
@@ -124,27 +129,6 @@ allAvailableComponents entity =
             |> List.filter isComponent
             |> List.map toInit
             |> Dict.fromList
-
-
-
--- Dict.fromList
--- [ ( "display"
---   , Display
---         { name = ""
---         , description = ""
---         }
---   )
--- , ( "style"
---   , Style
---         { selector = ""
---         }
---   )
--- , ( "rule"
---   , RuleBuilder
---         { interactionMatcher = With "item4"
---         }
---   )
--- ]
 
 
 getAvailableComponents : EntityClasses -> Components -> Components

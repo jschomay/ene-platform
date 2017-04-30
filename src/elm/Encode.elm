@@ -6,12 +6,13 @@ import PlatformTypes exposing (..)
 import Component
 
 
-toJson : { a | items : Dict String Entity, locations : Dict String Entity, characters : Dict String Entity } -> String
-toJson { items, locations, characters } =
+toJson : { a | items : Dict String Entity, locations : Dict String Entity, characters : Dict String Entity, rules : Dict String Entity } -> String
+toJson { items, locations, characters, rules } =
     Encode.object
         [ ( "items", encodeDict items )
         , ( "locations", encodeDict locations )
         , ( "characters", encodeDict characters )
+        , ( "rules", encodeDict rules )
         ]
         |> Encode.encode 2
 

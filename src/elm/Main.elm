@@ -221,6 +221,18 @@ update msg model =
                             |> Maybe.map .entityClass
                             |> Maybe.andThen (Component.getComponent name)
 
+                    withDefault component =
+                        case component of
+                            RuleBuilder component ->
+                                let
+                                    entityId =
+                                        Maybe.map .entityId model.focusedEntity |> Maybe.withDefault ""
+                                in
+                                    RuleBuilder { component | interactionMatcher = With entityId }
+
+                            _ ->
+                                component
+
                     updateHelper focusedEntity =
                         case component of
                             Nothing ->
@@ -229,7 +241,7 @@ update msg model =
 
                             Just component ->
                                 { focusedEntity
-                                    | editor = Dict.insert name component focusedEntity.editor
+                                    | editor = Dict.insert name (component |> withDefault) focusedEntity.editor
                                     , showingComponents = False
                                 }
                 in
@@ -264,7 +276,11 @@ view model =
     let
         exportData =
             Encode.toJson
-                { items = model.items, locations = model.locations, characters = model.characters }
+                { items = model.items
+                , locations = model.locations
+                , characters = model.characters
+                , rules = model.rules
+                }
     in
         Views.Layout.view
             { mdl = model.mdl

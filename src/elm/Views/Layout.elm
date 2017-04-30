@@ -65,10 +65,6 @@ view { mdl, activeTab, exportJson, items, focusedEntity } =
             }
 
 
-
--- TODO: forgot to move this into the Tab module and refactor
-
-
 headerView :
     Material.Model
     -> Int

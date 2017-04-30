@@ -8,6 +8,35 @@ import Material.Options as Options
 import Material
 
 
+selectForItems =
+    [ select [ onInput UpdateCondition ] [ option [ value "Fdsfd" ] [ text "Fdsfd" ] ] ]
+
+
+conditionOptions =
+    [ ( "itemIsInInventory", selectForItems, (\args -> ItemIsInInventory args), (\model -> model.items) )
+    , ( "characterIsInLocation", (\character location -> CharacterIsInLocation character location), (\model -> model.characters) )
+    ]
+
+
+
+-- ,characterIsNotInLocation String String
+-- ,currentLocationIs String
+-- ,currentLocationIsNot String
+-- ,itemIsInLocation String String
+-- ,itemIsNotInInventory String
+-- ,itemIsNotInLocation String String
+-- ,hasPreviouslyInteractedWith String
+-- ,hasNotPreviouslyInteractedWith String
+-- ,currentSceneIs String
+
+
+conditionsView =
+    [ div [ class "attributesEditor__item" ]
+        [ select [] [ option [ value "blah" ] [ text "blah" ] ]
+        ]
+    ]
+
+
 view : Material.Model -> String -> Component -> Html Msg
 view mdl componentName component =
     let
@@ -19,9 +48,6 @@ view mdl componentName component =
                 _ ->
                     component
 
-        updateAThing newVal =
-            updateFn newVal (\a -> { a | interactionMatcher = newVal })
-
         componentId interactionMatcher =
             case interactionMatcher of
                 With id ->
@@ -32,11 +58,12 @@ view mdl componentName component =
     in
         case component of
             RuleBuilder { interactionMatcher } ->
-                div [ class "attributesEditor" ]
+                div [ class "attributesEditor" ] <|
                     [ p [ class "attributesEditor__header" ] [ text "Rules component" ]
                     , div [ class "attributesEditor__item" ]
                         [ text <| componentId interactionMatcher ]
                     ]
+                        ++ conditionsView
 
             _ ->
                 div [] []
