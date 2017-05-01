@@ -22,7 +22,7 @@ type TabName
 type Component
     = Display { name : String, description : String }
     | Style { selector : String }
-    | RuleBuilder { interactionMatcher : InteractionMatcher }
+    | RuleBuilder { interactionMatcher : InteractionMatcher, conditions : List Condition }
 
 
 type Msg
@@ -31,6 +31,7 @@ type Msg
     | ChangeFocusedEntity String
     | UnfocusEntity
     | NewEntity
+    | UpdateRuleConditions String (Result String Condition)
     | UpdateEditor String (String -> Component) String
     | AddComponent String
     | ToggleComponentDropdown
@@ -64,14 +65,17 @@ type Condition
     = ItemIsInInventory String
     | CharacterIsInLocation String String
     | CharacterIsNotInLocation String String
-    | CurrentLocationIs String
-    | CurrentLocationIsNot String
-    | ItemIsInLocation String String
-    | ItemIsNotInInventory String
-    | ItemIsNotInLocation String String
-    | HasPreviouslyInteractedWith String
-    | HasNotPreviouslyInteractedWith String
-    | CurrentSceneIs String
+
+
+
+-- | CurrentLocationIs String
+-- | CurrentLocationIsNot String
+-- | ItemIsInLocation String String
+-- | ItemIsNotInInventory String
+-- | ItemIsNotInLocation String String
+-- | HasPreviouslyInteractedWith String
+-- | HasNotPreviouslyInteractedWith String
+-- | CurrentSceneIs String
 
 
 type ChangeWorldCommand

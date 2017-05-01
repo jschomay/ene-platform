@@ -199,6 +199,10 @@ update msg model =
                     , Cmd.none
                     )
 
+            UpdateRuleConditions ruleId newConditions ->
+                -- TODO find ruleid and update the conditions with newCondition
+                ( model, Cmd.none )
+
             UpdateEditor componentName f newVal ->
                 let
                     updateModel focusedEntity =

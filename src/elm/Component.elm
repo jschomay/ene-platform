@@ -118,7 +118,7 @@ allAvailableComponents entity =
                             Style { selector = "" }
 
                         "rule" ->
-                            RuleBuilder { interactionMatcher = With "" }
+                            RuleBuilder { interactionMatcher = With "", conditions = [] }
 
                         _ ->
                             Display { name = "", description = "" }
