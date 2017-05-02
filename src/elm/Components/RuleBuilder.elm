@@ -11,81 +11,52 @@ import Monocle.Prism exposing (Prism)
 import Html.SelectPrism exposing (selectp)
 
 
--- updateCondition component v =
---     let
---         toCondition s =
---             case s of
---                 "Item is in inventory" ->
---                     [ ItemIsInInventory "" ]
---                 "Character is in location" ->
---                     [ CharacterIsNotInLocation "" "" ]
---                 "Character is not in location" ->
---                     [ CharacterIsNotInLocation "" "" ]
---                 _ ->
---                     []
---     in
---         case component of
---             RuleBuilder r ->
---                 RuleBuilder { r | conditions = toCondition v }
---             _ ->
---                 component
--- see http://package.elm-lang.org/packages/toastal/select-prism/1.0.1
-
-
-conditionsView rule component =
-    [ div [ class "attributesEditor__item" ]
-        [ selectp conditionPrism (UpdateRuleConditions rule) (ItemIsInInventory "") [] conditionOptions ]
-      -- [ select
-      -- [ onInput <| UpdateRule rule (updateCondition component) ]
-      -- [ option [] [ text "Item is in inventory" ]
-      -- , option [] [ text "Character is in location" ]
-      -- , option [] [ text "Character is not in location" ]
-      -- ]
-      -- ]
-    ]
-
-
-conditionOptions =
-    [ ( "Item is in inventory", ItemIsInInventory "" )
-    , ( "Character is in location", CharacterIsInLocation "" "" )
-    , ( "Character is not in location", CharacterIsNotInLocation "" "" )
-    ]
-
-
-conditionPrism =
+updateCondition component v =
     let
-        conditionFromString : String -> Maybe Condition
-        conditionFromString s =
+        toCondition s =
             case s of
                 "Item is in inventory" ->
-                    Just <| ItemIsInInventory ""
+                    [ ItemIsInInventory "" ]
 
                 "Character is in location" ->
-                    Just <| CharacterIsNotInLocation "" ""
+                    [ CharacterIsNotInLocation "" "" ]
 
                 "Character is not in location" ->
-                    Just <| CharacterIsNotInLocation "" ""
+                    [ CharacterIsNotInLocation "" "" ]
 
                 _ ->
-                    Nothing
-
-        conditionToString : Condition -> String
-        conditionToString c =
-            case c of
-                ItemIsInInventory _ ->
-                    "Item is in inventory"
-
-                CharacterIsInLocation _ _ ->
-                    "Character is in location"
-
-                CharacterIsNotInLocation _ _ ->
-                    "Character is not in location"
+                    []
     in
-        Prism conditionFromString conditionToString
+        case component of
+            RuleBuilder r ->
+                RuleBuilder { r | conditions = toCondition v }
+
+            _ ->
+                component
 
 
-view : Material.Model -> String -> Component -> Html Msg
-view mdl componentName component =
+conditionsView entityId componentName component =
+    [ div [ class "attributesEditor__item" ]
+        [ select
+            [ onInput <| UpdateEntity entityId componentName (updateCondition component) ]
+            [ option [] [ text "Item is in inventory" ]
+            , option [] [ text "Character is in location" ]
+            , option [] [ text "Character is not in location" ]
+            ]
+        ]
+    ]
+
+
+
+-- conditionOptions =
+--     [ ( "Item is in inventory", ItemIsInInventory "" )
+--     , ( "Character is in location", CharacterIsInLocation "" "" )
+--     , ( "Character is not in location", CharacterIsNotInLocation "" "" )
+--     ]
+
+
+view : Material.Model -> String -> String -> Component -> Html Msg
+view mdl entityId componentName component =
     let
         componentId interactionMatcher =
             case interactionMatcher of
@@ -102,7 +73,7 @@ view mdl componentName component =
                     , div [ class "attributesEditor__item" ]
                         [ text <| componentId interactionMatcher ]
                     ]
-                        ++ conditionsView "TODO get rule id here" component
+                        ++ conditionsView entityId componentName component
 
             _ ->
                 div [] []

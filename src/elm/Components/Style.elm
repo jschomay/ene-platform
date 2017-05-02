@@ -8,8 +8,8 @@ import Material.Options as Options
 import Material
 
 
-view : Material.Model -> String -> Component -> Html Msg
-view mdl componentName component =
+view : Material.Model -> String -> String -> Component -> Html Msg
+view mdl entityId componentName component =
     let
         updateSelector newVal =
             updateFn newVal (\a -> { a | selector = newVal })
@@ -33,7 +33,7 @@ view mdl componentName component =
                             [ Textfield.label "CSS Selector"
                             , Textfield.floatingLabel
                             , Textfield.value selector
-                            , Options.onInput <| UpdateEditor componentName updateSelector
+                            , Options.onInput <| UpdateEntity entityId componentName updateSelector
                             ]
                             []
                         ]

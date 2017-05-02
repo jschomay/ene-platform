@@ -43,8 +43,8 @@ getComponents (Entity components) =
 -- TODO: test the update editor functions
 
 
-editorView : Material.Model -> EntityClasses -> Components -> Bool -> List (Html Msg)
-editorView mdl entity components showingComponents =
+editorView : Material.Model -> String -> EntityClasses -> Components -> Bool -> List (Html Msg)
+editorView mdl entityId entity components showingComponents =
     let
         availableComponents =
             Component.getAvailableComponents entity components
@@ -56,7 +56,7 @@ editorView mdl entity components showingComponents =
             let
                 addComponentRenderer ( name, component ) =
                     Menu.item
-                        [ Menu.onSelect <| AddComponent name ]
+                        [ Menu.onSelect <| AddComponent entityId name ]
                         [ text name ]
             in
                 Dict.toList availableComponents
@@ -74,7 +74,7 @@ editorView mdl entity components showingComponents =
                 div [] []
     in
         (Dict.values <|
-            Dict.map (Component.view mdl) components
+            Dict.map (Component.view mdl entityId) components
         )
             ++ [ componentDropdown ]
 

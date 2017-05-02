@@ -31,9 +31,8 @@ type Msg
     | ChangeFocusedEntity String
     | UnfocusEntity
     | NewEntity
-    | UpdateRuleConditions String (Result String Condition)
-    | UpdateEditor String (String -> Component) String
-    | AddComponent String
+    | UpdateEntity String String (String -> Component) String
+    | AddComponent String String
     | ToggleComponentDropdown
     | Mdl (Material.Msg Msg)
 

@@ -42,14 +42,8 @@ render :
     Material.Model
     -> Int
     -> Dict String Entity
-    -> Maybe
-        { entityId : String
-        , entityClass : EntityClasses
-        , editor : Components
-        , showingComponents : Bool
-        }
     -> List (Tabs.Label msg)
-render mdl activeTab items focusedEntity =
+render mdl activeTab items =
     let
         toTab ( i, tabName, icon ) =
             Tabs.label

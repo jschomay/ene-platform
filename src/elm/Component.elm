@@ -41,17 +41,17 @@ componentEntities =
     ]
 
 
-view : Material.Model -> String -> Component -> Html Msg
-view mdl componentName component =
+view : Material.Model -> String -> String -> Component -> Html Msg
+view mdl entityId componentName component =
     case component of
         Display attributes ->
-            Components.Display.view mdl componentName component
+            Components.Display.view mdl entityId componentName component
 
         Style attributes ->
-            Components.Style.view mdl componentName component
+            Components.Style.view mdl entityId componentName component
 
         RuleBuilder attributes ->
-            Components.RuleBuilder.view mdl componentName component
+            Components.RuleBuilder.view mdl entityId componentName component
 
 
 encode : Component -> Encode.Value

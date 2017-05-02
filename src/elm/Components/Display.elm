@@ -8,8 +8,8 @@ import Material.Options as Options
 import Material
 
 
-view : Material.Model -> String -> Component -> Html Msg
-view mdl componentName component =
+view : Material.Model -> String -> String -> Component -> Html Msg
+view mdl entityId componentName component =
     let
         updateFn newVal f =
             case component of
@@ -36,7 +36,7 @@ view mdl componentName component =
                             [ Textfield.label "Name"
                             , Textfield.floatingLabel
                             , Textfield.value name
-                            , Options.onInput <| UpdateEditor componentName updateName
+                            , Options.onInput <| UpdateEntity entityId componentName updateName
                             ]
                             []
                         ]
@@ -48,7 +48,7 @@ view mdl componentName component =
                             , Textfield.textarea
                             , Textfield.floatingLabel
                             , Textfield.value description
-                            , Options.onInput <| UpdateEditor componentName updateDescription
+                            , Options.onInput <| UpdateEntity entityId componentName updateDescription
                             ]
                             []
                         ]

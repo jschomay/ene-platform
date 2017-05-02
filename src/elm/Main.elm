@@ -35,7 +35,6 @@ type alias Model =
         Maybe
             { entityId : String
             , entityClass : EntityClasses
-            , editor : Components
             , showingComponents : Bool
             }
     , mdl : Material.Model
@@ -124,26 +123,32 @@ getActiveEntities model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
+        currentEntities : Dict String Entity
         currentEntities =
             getActiveEntities model
 
-        changeFocusedEntity focusedEntity model =
+        changeFocusedEntity : String -> Model -> Model
+        changeFocusedEntity focusedEntityId model =
             { model
                 | focusedEntity =
                     Just
-                        { entityId = focusedEntity
-                        , editor =
-                            (Entity.getComponents
-                                (Dict.get focusedEntity currentEntities
-                                    |> Maybe.withDefault (Entity.empty <| Tabs.tabToEntityClass model.activeTab)
-                                )
-                            )
+                        { entityId = focusedEntityId
                         , entityClass = Tabs.tabToEntityClass model.activeTab
                         , showingComponents = False
                         }
             }
 
-        updateActiveEntityCollection entityId newEntity =
+        getFocusedEntityComponents : String -> Components
+        getFocusedEntityComponents focusedEntityId =
+            Entity.getComponents (getFocusedEntity focusedEntityId)
+
+        getFocusedEntity : String -> Entity
+        getFocusedEntity id =
+            Dict.get id currentEntities
+                |> Maybe.withDefault (Entity.empty <| Tabs.tabToEntityClass model.activeTab)
+
+        updateActiveEntityCollection : String -> Entity -> Model -> Model
+        updateActiveEntityCollection entityId newEntity model =
             case model.activeTab of
                 ItemsTab ->
                     { model | items = Dict.insert entityId newEntity model.items }
@@ -173,8 +178,8 @@ update msg model =
                     , Cmd.none
                     )
 
-            ChangeFocusedEntity focusedEntity ->
-                ( changeFocusedEntity focusedEntity model, Cmd.none )
+            ChangeFocusedEntity focusedEntityId ->
+                ( changeFocusedEntity focusedEntityId model, Cmd.none )
 
             UnfocusEntity ->
                 ( { model | focusedEntity = Nothing }, Cmd.none )
@@ -188,7 +193,7 @@ update msg model =
                         Entity.newEntityId model.activeTab newId
 
                     newModel =
-                        updateActiveEntityCollection newEntityId (Entity.empty <| Tabs.tabToEntityClass model.activeTab)
+                        updateActiveEntityCollection newEntityId (Entity.empty <| Tabs.tabToEntityClass model.activeTab) model
                 in
                     ( changeFocusedEntity newEntityId newModel
                         |> (\model ->
@@ -199,62 +204,60 @@ update msg model =
                     , Cmd.none
                     )
 
-            UpdateRuleConditions ruleId newConditions ->
-                -- TODO find ruleid and update the conditions with newCondition
-                ( model, Cmd.none )
-
-            UpdateEditor componentName f newVal ->
+            UpdateEntity entityId componentName f v ->
                 let
-                    updateModel focusedEntity =
-                        { focusedEntity | editor = Dict.insert componentName (f newVal) focusedEntity.editor }
-                            |> \{ entityId, entityClass, editor, showingComponents } ->
-                                updateActiveEntityCollection entityId (Entity.update (Entity.empty <| Tabs.tabToEntityClass model.activeTab) editor)
-                                    |> \model -> { model | focusedEntity = Just { entityId = entityId, entityClass = entityClass, editor = editor, showingComponents = showingComponents } }
+                    updatedComponent =
+                        f v
+
+                    updatedEntity =
+                        Dict.get entityId currentEntities
+                            |> Maybe.map (\(Entity components) -> Entity <| Dict.insert componentName updatedComponent components)
 
                     updatedModel =
-                        Maybe.map updateModel model.focusedEntity
-                            |> Maybe.withDefault model
+                        case updatedEntity of
+                            Nothing ->
+                                model
+
+                            Just newEntity ->
+                                updateActiveEntityCollection entityId newEntity model
                 in
-                    -- TODO: refactor this bad boy, but for now just keeping forward
                     ( updatedModel, Cmd.none )
 
-            AddComponent name ->
+            AddComponent entityId componentName ->
                 let
                     component =
+                        -- TODO find a way to get the class from the entityId instead of the focusedEntity
                         model.focusedEntity
                             |> Maybe.map .entityClass
-                            |> Maybe.andThen (Component.getComponent name)
+                            |> Maybe.andThen (Component.getComponent componentName)
 
-                    withDefault component =
-                        case component of
-                            RuleBuilder component ->
-                                let
-                                    entityId =
-                                        Maybe.map .entityId model.focusedEntity |> Maybe.withDefault ""
-                                in
-                                    RuleBuilder { component | interactionMatcher = With entityId }
-
-                            _ ->
-                                component
-
-                    updateHelper focusedEntity =
+                    updatedEntity =
                         case component of
                             Nothing ->
-                                -- TODO: figure out a better way to handle all this
-                                Debug.crash "Could not find the component..."
+                                Nothing
 
                             Just component ->
-                                { focusedEntity
-                                    | editor = Dict.insert name (component |> withDefault) focusedEntity.editor
-                                    , showingComponents = False
-                                }
+                                Dict.get entityId currentEntities
+                                    |> Maybe.map (\(Entity components) -> Entity <| Dict.insert componentName component components)
+
+                    closeDropdown focusedEntity =
+                        { focusedEntity | showingComponents = False }
+
+                    updateEntity model =
+                        case updatedEntity of
+                            Nothing ->
+                                model
+
+                            Just newEntity ->
+                                updateActiveEntityCollection entityId newEntity model
                 in
-                    if name == "" then
+                    if componentName == "" then
                         ( model, Cmd.none )
                     else
                         ( { model
-                            | focusedEntity = Maybe.map updateHelper model.focusedEntity
+                            | focusedEntity = Maybe.map closeDropdown model.focusedEntity
                           }
+                            |> updateEntity
                         , Cmd.none
                         )
 

@@ -25,7 +25,6 @@ view :
     , focusedEntity :
         Maybe
             { entityId : String
-            , editor : Components
             , entityClass : EntityClasses
             , showingComponents : Bool
             }
@@ -72,14 +71,13 @@ headerView :
     -> Maybe
         { entityId : String
         , entityClass : EntityClasses
-        , editor : Components
         , showingComponents : Bool
         }
     -> List (Html Msg)
 headerView mdl activeTab items focusedEntity =
     let
         tabContent =
-            Tabs.render mdl activeTab items focusedEntity
+            Tabs.render mdl activeTab items
     in
         [ MdlTabs.render Mdl
             [ 0 ]
@@ -104,7 +102,6 @@ accordionView :
     -> Dict String Entity
     -> Maybe
         { entityId : String
-        , editor : Components
         , entityClass : EntityClasses
         , showingComponents : Bool
         }
@@ -113,7 +110,7 @@ accordionView mdl entities focusedEntity =
     let
         focusedEntityId =
             Maybe.withDefault
-                { entityId = "", entityClass = Item, editor = Dict.empty, showingComponents = False }
+                { entityId = "", entityClass = Item, showingComponents = False }
                 focusedEntity
                 |> .entityId
 
@@ -129,32 +126,33 @@ accordionView mdl entities focusedEntity =
             else
                 Options.cs <| baseClass
 
-        editorView id =
-            case focusedEntity of
-                Nothing ->
-                    [ div [] [ text "nothing here" ] ]
+        editorView { entityId, entityClass, showingComponents } =
+            let
+                components =
+                    Dict.get entityId entities
+                        |> Maybe.map (\(Entity components) -> components)
+                        |> Maybe.withDefault Dict.empty
+            in
+                Entity.editorView mdl entityId entityClass components showingComponents
 
-                Just { entityId, editor, entityClass, showingComponents } ->
-                    Entity.editorView mdl entityClass editor showingComponents
-
-        clickEvent id =
-            if id == focusedEntityId then
+        clickEvent entityId =
+            if entityId == focusedEntityId then
                 UnfocusEntity
             else
-                ChangeFocusedEntity id
+                ChangeFocusedEntity entityId
 
-        accordionItem ( id, entity ) =
+        accordionItem ( entityId, entity ) =
             div [ class "entity" ]
                 [ div
-                    [ buttonClasses "accordionButton" id
-                    , onClick <| clickEvent id
+                    [ buttonClasses "accordionButton" entityId
+                    , onClick <| clickEvent entityId
                     ]
-                    [ text <| Entity.entityTitle id entity ++ " (id: " ++ id ++ ")" ]
+                    [ text <| Entity.entityTitle entityId entity ++ " (id: " ++ entityId ++ ")" ]
                 , Options.div
-                    [ panelClass "accordionPanel" id
+                    [ panelClass "accordionPanel" entityId
                     , Elevation.e6
                     ]
-                    (editorView id)
+                    (Maybe.map editorView focusedEntity |> Maybe.withDefault [])
                 ]
 
         accordionItems =
