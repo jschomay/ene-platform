@@ -72,11 +72,20 @@ body {
   display: block;
 }
 
+
+
 .accordionButton {
-  padding: 15px;
-  /* background-color: #193441; */
+  padding: 10px;
   display: flex;
   justify-content: space-between;
+  border: 1px solid #eee;
+  margin-bottom: 2px;
+  cursor: pointer;
+}
+
+.accordionButton:hover {
+  background-color: #3F51B5;
+  color: white;
 }
 
 .accordionButton--active {

@@ -11,6 +11,10 @@ import Monocle.Prism exposing (Prism)
 import Html.SelectPrism exposing (selectp)
 
 
+new entityId =
+    RuleBuilder { interactionMatcher = With entityId, conditions = [] }
+
+
 updateCondition component v =
     let
         toCondition s =

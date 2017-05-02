@@ -1,19 +1,18 @@
 module Views.Layout exposing (..)
 
 import PlatformTypes exposing (..)
+import Views.Accordian exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import Entity
 import Tabs
+import Entity
+import Material.Button as Button
 import Dict exposing (Dict)
 import Http exposing (encodeUri)
 import Material.Grid as Grid
 import Material.Layout as Layout
 import Material.Tabs as MdlTabs
 import Material.Options as Options
-import Material.Elevation as Elevation
-import Material.Button as Button
 import Material
 
 
@@ -78,6 +77,17 @@ headerView mdl activeTab items focusedEntity =
     let
         tabContent =
             Tabs.render mdl activeTab items
+
+        newItem =
+            div [ class "entity" ]
+                [ Button.render Mdl
+                    [ 0 ]
+                    mdl
+                    [ Button.colored
+                    , Options.onClick NewEntity
+                    ]
+                    [ text "Add New" ]
+                ]
     in
         [ MdlTabs.render Mdl
             [ 0 ]
@@ -92,84 +102,6 @@ headerView mdl activeTab items focusedEntity =
                 , Options.css "flex" "1 1 0"
                 ]
               <|
-                accordionView mdl items focusedEntity
+                accordionView mdl items "title..." Entity.editorView newItem focusedEntity
             ]
         ]
-
-
-accordionView :
-    Material.Model
-    -> Dict String Entity
-    -> Maybe
-        { entityId : String
-        , entityClass : EntityClasses
-        , showingComponents : Bool
-        }
-    -> List (Html Msg)
-accordionView mdl entities focusedEntity =
-    let
-        focusedEntityId =
-            Maybe.withDefault
-                { entityId = "", entityClass = Item, showingComponents = False }
-                focusedEntity
-                |> .entityId
-
-        buttonClasses baseClass entityId =
-            classList
-                [ ( baseClass, True )
-                , ( baseClass ++ "--active", entityId == focusedEntityId )
-                ]
-
-        panelClass baseClass entityId =
-            if entityId == focusedEntityId then
-                Options.cs <| baseClass ++ "--active"
-            else
-                Options.cs <| baseClass
-
-        editorView { entityId, entityClass, showingComponents } =
-            let
-                components =
-                    Dict.get entityId entities
-                        |> Maybe.map (\(Entity components) -> components)
-                        |> Maybe.withDefault Dict.empty
-            in
-                Entity.editorView mdl entityId entityClass components showingComponents
-
-        clickEvent entityId =
-            if entityId == focusedEntityId then
-                UnfocusEntity
-            else
-                ChangeFocusedEntity entityId
-
-        accordionItem ( entityId, entity ) =
-            div [ class "entity" ]
-                [ div
-                    [ buttonClasses "accordionButton" entityId
-                    , onClick <| clickEvent entityId
-                    ]
-                    [ text <| Entity.entityTitle entityId entity ++ " (id: " ++ entityId ++ ")" ]
-                , Options.div
-                    [ panelClass "accordionPanel" entityId
-                    , Elevation.e6
-                    ]
-                    (Maybe.map editorView focusedEntity |> Maybe.withDefault [])
-                ]
-
-        accordionItems =
-            entities
-                |> Dict.toList
-                |> List.map accordionItem
-
-        newItem =
-            [ div [ class "entity" ]
-                [ Button.render Mdl
-                    [ 0 ]
-                    mdl
-                    [ Button.colored
-                    , Options.onClick NewEntity
-                    ]
-                    [ text "Add New" ]
-                ]
-            ]
-    in
-        accordionItems ++ newItem

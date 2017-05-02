@@ -33,6 +33,7 @@ type Msg
     | NewEntity
     | UpdateEntity String String (String -> Component) String
     | AddComponent String String
+    | AddRule String
     | ToggleComponentDropdown
     | Mdl (Material.Msg Msg)
 

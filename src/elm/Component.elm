@@ -32,11 +32,7 @@ componentEntities =
       }
     , { component = "rule"
       , entities =
-            [ ( Rule, False )
-            , ( Item, False )
-            , ( Location, False )
-            , ( Character, False )
-            ]
+            [ ( Rule, True ) ]
       }
     ]
 

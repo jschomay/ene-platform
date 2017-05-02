@@ -12,9 +12,12 @@ module Entity
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Views.Accordian exposing (..)
 import PlatformTypes exposing (..)
 import Component
 import Material.Menu as Menu
+import Material.Button as Button
+import Material.Options as Options
 import Material
 
 
@@ -63,8 +66,8 @@ editorView mdl entityId entity components showingComponents =
                     |> List.map addComponentRenderer
                     |> \menuItems ->
                         div [ class "addComponent" ]
-                            [ span [] []
-                            , Menu.render Mdl [ 0 ] mdl [ Menu.topRight ] menuItems
+                            [ span [] [ text "Add component" ]
+                            , Menu.render Mdl [ 0 ] mdl [ Menu.bottomRight ] menuItems
                             ]
 
         componentDropdown =
@@ -72,11 +75,39 @@ editorView mdl entityId entity components showingComponents =
                 addComponentView
             else
                 div [] []
+
+        newItem =
+            div [ class "entity" ]
+                [ Button.render Mdl
+                    [ 0 ]
+                    mdl
+                    [ Button.colored
+                    , Options.onClick <| AddRule entityId
+                    ]
+                    [ text "Add Rule" ]
+                ]
+
+        associatedRules =
+            --TODO need to get the real rules here...
+            Dict.fromList [ ( "rule1", Entity Dict.empty ), ( "rule2", Entity Dict.empty ) ]
+
+        rulesEl =
+            div [ class "attributesEditor" ] <|
+                [ p [] [ text <| "Rules for this " ++ toString entity ] ]
+                    -- TODO need to pass in the focused rule somehow, also the collapse action needs to apply to the focused rule, not the focused entity
+                    ++
+                        (accordionView mdl associatedRules "my title" editorView newItem Nothing)
     in
-        (Dict.values <|
-            Dict.map (Component.view mdl entityId) components
-        )
-            ++ [ componentDropdown ]
+        componentDropdown
+            :: (Dict.values <| Dict.map (Component.view mdl entityId) components)
+            ++ [ rulesEl ]
+
+
+
+-- TODO
+-- showing matching rules in item editor
+-- restore titles
+-- clean up accordian view signature?
 
 
 newEntityId : TabName -> Int -> String

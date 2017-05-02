@@ -9,6 +9,7 @@ import Tabs
 import Encode
 import Component
 import Material
+import Components.RuleBuilder
 
 
 -- APP
@@ -260,6 +261,24 @@ update msg model =
                             |> updateEntity
                         , Cmd.none
                         )
+
+            AddRule entityId ->
+                let
+                    newId =
+                        model.lastId + 1
+
+                    newEntityId =
+                        Entity.newEntityId RulesTab newId
+
+                    defaultComponents =
+                        Dict.singleton "rule" <| Components.RuleBuilder.new entityId
+
+                    newRules =
+                        Dict.insert newEntityId (Entity defaultComponents) model.rules
+                in
+                    ( { model | rules = newRules, lastId = newId }
+                    , Cmd.none
+                    )
 
             ToggleComponentDropdown ->
                 let
