@@ -75,7 +75,6 @@ if ( TARGET_ENV === 'development' ) {
             'style-loader',
             'css-loader',
             'postcss-loader',
-            'sass-loader'
           ]
         }
       ]
