@@ -1,3 +1,4 @@
+require( 'open-iconic/font/css/open-iconic-bootstrap.css' );
 require( 'bootstrap-css-only' );
 require( './styles/main.css' );
 
