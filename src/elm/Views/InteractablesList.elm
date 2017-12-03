@@ -1,38 +1,66 @@
 module Views.InteractablesList exposing (view)
 
 import Html exposing (..)
+import Html.Events exposing (..)
 import Html.Attributes exposing (..)
+import Dict exposing (Dict)
+import Types exposing (..)
 
 
-view : Html msg
-view =
-    div [ class "list-group mb-2" ]
-        [ collapsed "umbrella"
-        , active "note"
-        , collapsed "red marble"
-        , collapsed "green marble"
-        ]
+view : Model -> Html Msg
+view model =
+    div [ class "list-group mb-2" ] <|
+        case model.activeTab of
+            Items active ->
+                Dict.toList model.items
+                    |> List.map
+                        (\( k, (Item name) as item ) ->
+                            if Just item == active then
+                                expanded { id = k, name = name } <| CollapseInteractable
+                            else
+                                collapsed { id = k, name = name } <| ExpandInteractable <| I item
+                        )
+
+            Locations active ->
+                Dict.toList model.locations
+                    |> List.map
+                        (\( k, (Location name) as location ) ->
+                            if Just location == active then
+                                expanded { id = k, name = name } <| CollapseInteractable
+                            else
+                                collapsed { id = k, name = name } <| ExpandInteractable <| L location
+                        )
+
+            Characters active ->
+                Dict.toList model.characters
+                    |> List.map
+                        (\( k, (Character name) as character ) ->
+                            if Just character == active then
+                                expanded { id = k, name = name } <| CollapseInteractable
+                            else
+                                collapsed { id = k, name = name } <| ExpandInteractable <| C character
+                        )
 
 
-button : String -> Maybe String -> Maybe String -> Html msg
-button style icon_ text_ =
+button : String -> Maybe String -> Maybe String -> Msg -> Html Msg
+button style icon_ text_ msg =
     case ( icon_, text_ ) of
         ( Nothing, Nothing ) ->
             text ""
 
         ( Just icon_, Nothing ) ->
-            Html.button [ class <| "btn btn-" ++ style ++ " btn-sm" ] [ icon icon_ ]
+            Html.button [ onClick msg, class <| "btn btn-" ++ style ++ " btn-sm" ] [ icon icon_ ]
 
         ( Nothing, Just text_ ) ->
-            Html.button [ class <| "btn btn-" ++ style ++ " btn-sm" ] [ text text_ ]
+            Html.button [ onClick msg, class <| "btn btn-" ++ style ++ " btn-sm" ] [ text text_ ]
 
         ( Just icon_, Just text_ ) ->
-            Html.button [ class <| "btn btn-" ++ style ++ " btn-sm" ] [ span [ class "mr-2" ] [ icon icon_ ], text text_ ]
+            Html.button [ onClick msg, class <| "btn btn-" ++ style ++ " btn-sm" ] [ span [ class "mr-2" ] [ icon icon_ ], text text_ ]
 
 
-deleteButton : Html msg
+deleteButton : Html Msg
 deleteButton =
-    button "danger" (Just "trash") Nothing
+    button "danger" (Just "trash") Nothing NoOp
 
 
 icon : String -> Html msg
@@ -40,22 +68,26 @@ icon name =
     small [ class <| "oi oi-" ++ name ] []
 
 
-collapsed : String -> Html msg
-collapsed name =
-    a [ href "#", class "list-group-item list-group-item-action d-flex align-items-center" ]
+collapsed : { id : String, name : String } -> Msg -> Html Msg
+collapsed { id, name } msg =
+    a
+        [ href "#"
+        , onClick msg
+        , class "list-group-item list-group-item-action d-flex align-items-center"
+        ]
         [ span [ class "mr-2" ] [ icon "briefcase" ]
         , span [ class "mr-auto" ] [ text name ]
         , deleteButton
         ]
 
 
-active : String -> Html msg
-active name =
+expanded : { id : String, name : String } -> msg -> Html Msg
+expanded { id, name } mst =
     Html.form [ class "list-group-item list-group-item-success" ]
         [ h4 []
             [ span [ class "mr-2" ] [ icon "briefcase" ]
-            , text "Edit item"
-            , span [ class "float-right" ] [ button "light" (Just "minus") Nothing ]
+            , text <| "Edit \"" ++ name ++ "\""
+            , span [ class "float-right" ] [ button "light" (Just "minus") Nothing CollapseInteractable ]
             ]
         , div [ class "form-group" ]
             [ label [] [ text "Display name" ]
@@ -68,19 +100,19 @@ active name =
             , ruleCollapsed "give to harry"
             , ruleCollapsed "hide from harry"
             ]
-        , button "primary" (Just "plus") (Just "add rule")
+        , button "primary" (Just "plus") (Just "add rule") NoOp
         ]
 
 
-ruleCollapsed : String -> Html msg
+ruleCollapsed : String -> Html Msg
 ruleCollapsed summary =
     a [ href "#", class "list-group-item list-group-item-action" ] [ span [ class "mr-2" ] [ icon "bolt" ], text summary ]
 
 
-ruleActive : String -> Html msg
+ruleActive : String -> Html Msg
 ruleActive summary =
     div [ class "list-group-item list-group-item-warning" ]
-        [ h4 [] [ span [ class "mr-2" ] [ icon "bolt" ], text "Edit rule", span [ class "float-right" ] [ button "light" (Just "minus") Nothing ] ]
+        [ h4 [] [ span [ class "mr-2" ] [ icon "bolt" ], text "Edit rule", span [ class "float-right" ] [ button "light" (Just "minus") Nothing NoOp ] ]
         , div [ class "form-group" ]
             [ label [] [ text "Summary" ]
             , input [ class "form-control", value summary ] []
@@ -131,7 +163,7 @@ ruleActive summary =
                 , div [ class "col-md-auto" ]
                     [ deleteButton ]
                 ]
-            , button "primary" (Just "plus") Nothing
+            , button "primary" (Just "plus") Nothing NoOp
             ]
         , label [] [ text "Changes" ]
         , ul []
@@ -146,19 +178,19 @@ ruleActive summary =
                 , div [ class "col-md-auto" ]
                     [ deleteButton ]
                 ]
-            , button "primary" (Just "plus") Nothing
+            , button "primary" (Just "plus") Nothing NoOp
             ]
         , label [] [ text "Narrative" ]
         , p [] [ small [ class "form-text text-muted" ] [ text "Add narrative blocks to cycle through each time this rule triggers, stopping on the last one.  (Note that this feature is part of the client, not part of the engine core.)" ] ]
         , ul []
             [ narrative "Some nice little story goes here"
             , narrative ""
-            , button "primary" (Just "plus") Nothing
+            , button "primary" (Just "plus") Nothing NoOp
             ]
         ]
 
 
-narrative : String -> Html msg
+narrative : String -> Html Msg
 narrative text =
     li [ class "form-group form-row" ]
         [ div [ class "col" ]
